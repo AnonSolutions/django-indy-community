@@ -1,1 +1,1 @@
-from .model_tests import IndyUserTests
+from .model_tests import IndyUserTests, IndyWalletTests, IndyOrganizationTests, IndyOrgRelationshipTests, IndySchemaTests, IndyCredentialDefinitionTests, IndyProofRequestTests, AgentConnectionTests, AgentConversationTests

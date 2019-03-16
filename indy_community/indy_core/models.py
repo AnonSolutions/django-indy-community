@@ -89,8 +89,8 @@ class IndyOrganization(models.Model):
 
 # Association class for user/organization relationship
 class IndyOrgRelationship(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    org = models.ForeignKey(IndyOrganization, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='indyrelationship_set', on_delete=models.CASCADE)
+    org = models.ForeignKey(IndyOrganization, related_name='indyrelationship_set', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.user.email + ':' + self.org.org_name
