@@ -13,17 +13,6 @@ from .models import *
 from .utils import *
 
 
-def calc_wallet_seed(wallet_name, org_role=''):
-    """
-    calculate a wallet seed based on the wallet wallet name
-    """
-
-    if org_role == 'Trustee':
-        return settings.INDY_CONFIG['vcx_enterprise_seed']
-    else:
-        return (settings.INDY_CONFIG['vcx_institution_seed'] + wallet_name)[-32:]
-
-
 def get_user_wallet_name(username):
     """
     Determine wallet name based on a user name (email)

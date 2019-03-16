@@ -1,2 +1,3 @@
 from .model_tests import IndyUserTests, IndyWalletTests, IndyOrganizationTests, IndyOrgRelationshipTests, IndySchemaTests, IndyCredentialDefinitionTests, IndyProofRequestTests, AgentConnectionTests, AgentConversationTests
 from .wallet_util_tests import WalletDBTests
+from .indy_util_tests import IndyDIDTests
