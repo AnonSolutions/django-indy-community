@@ -1,0 +1,10 @@
+-r base.txt
+-e git+https://github.com/deschler/django-modeltranslation.git#egg=django-modeltranslation
+python3-indy
+python3-wrapper-vcx
+django-extensions
+djangorestframework
+markdown
+django-filter
+django-background-tasks
+aiohttp~=3.3.0
