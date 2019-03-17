@@ -24,8 +24,11 @@ class WalletDBTests(TestCase):
         wallet_handle = open_wallet(user_wallet_name, raw_password)
         res = close_wallet(wallet_handle)
         self.assertEqual(res, 0)
+
+        # cleanup after ourselves
         res = delete_wallet(user_wallet_name, raw_password)
         self.assertEqual(res, 0)
+
 
     def test_org_wallet_db_lifecycle(self):
         # create a wallet
@@ -39,6 +42,8 @@ class WalletDBTests(TestCase):
         wallet_handle = open_wallet(org_wallet_name, raw_password)
         res = close_wallet(wallet_handle)
         self.assertEqual(res, 0)
+
+        # cleanup after ourselves
         res = delete_wallet(org_wallet_name, raw_password)
         self.assertEqual(res, 0)
 
