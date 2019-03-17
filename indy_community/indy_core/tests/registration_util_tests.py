@@ -51,7 +51,7 @@ class RegistrationTests(TestCase):
 
         # now org
         org_name = 'My Unittest Org Inc'
-        org_signup(user, raw_password, org_name)
+        org = org_signup(user, raw_password, org_name)
 
         # fetch everything ...
         fetch_user = get_user_model().objects.filter(email=email).all()[0]

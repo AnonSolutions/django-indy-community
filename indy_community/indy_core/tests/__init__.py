@@ -2,3 +2,4 @@ from .model_tests import IndyUserTests, IndyWalletTests, IndyOrganizationTests, 
 from .wallet_util_tests import WalletDBTests
 from .indy_util_tests import IndyDIDTests
 from .registration_util_tests import RegistrationTests
+from .agent_util_tests import AgentInteractionTests
