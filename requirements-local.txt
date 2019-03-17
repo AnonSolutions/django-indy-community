@@ -1,0 +1,1 @@
+file:///Users/icostanzo/Projects/indy-sdk/vcx/wrappers/python3#egg=python3-wrapper-vcx
