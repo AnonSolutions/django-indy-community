@@ -119,7 +119,7 @@ class IndySchema(models.Model):
 class IndyCredentialDefinition(models.Model):
     ledger_creddef_id = models.CharField(max_length=40, unique=True)
     ledger_schema = models.ForeignKey(IndySchema, on_delete=models.CASCADE)
-    wallet = models.ForeignKey(IndyWallet, to_field="wallet_name", on_delete=models.CASCADE)
+    wallet = models.ForeignKey(IndyWallet, to_field="wallet_name", related_name='indycreddef_set', on_delete=models.CASCADE)
     creddef_name = models.CharField(max_length=40)
     creddef_handle = models.CharField(max_length=40)
     creddef_template = models.TextField(max_length=4000)

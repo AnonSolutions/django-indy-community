@@ -5,6 +5,7 @@ from os import environ
 from pathlib import Path
 from tempfile import gettempdir
 import random
+import uuid
 
 from django.conf import settings
 
@@ -224,7 +225,7 @@ def create_proof_request(name, description, attrs, predicates):
 # utilities to create and confirm agent-to-agent connections
 ######################################################################
 
-def send_connection_invitation(config, partner_name):
+def send_connection_invitation(wallet, config, partner_name):
     print(" >>> Initialize libvcx with new configuration for a connection to", partner_name)
     try:
         config_json = json.dumps(config)
@@ -242,6 +243,16 @@ def send_connection_invitation(config, partner_name):
         connection_data = run_coroutine(connection_to_.serialize)
         connection_to_.release()
         connection_to_ = None
+
+        connection = AgentConnection(
+            wallet = wallet,
+            partner_name = partner_name,
+            invitation = json.dumps(invite_details),
+            token = str(uuid.uuid4()),
+            connection_type = 'Outbound',
+            connection_data = json.dumps(connection_data),
+            status = 'Sent')
+        connection.save()
     except:
         raise
     finally:
@@ -255,7 +266,7 @@ def send_connection_invitation(config, partner_name):
     return connection_data, invite_details
 
 
-def send_connection_confirmation(config, partner_name, invite_details):
+def send_connection_confirmation(wallet, config, partner_name, invite_details):
     print(" >>> Initialize libvcx with configuration")
     try:
         config_json = json.dumps(config)
@@ -273,6 +284,21 @@ def send_connection_confirmation(config, partner_name, invite_details):
         connection_data = run_coroutine(connection_from_.serialize)
         connection_from_.release()
         connection_from_ = None
+
+        connections = AgentConnection.objects.filter(wallet=wallet, partner_name=partner_name).all()
+        if 0 < len(connections):
+            connection = connections[0]
+            connection.connection_data = json.dumps(connection_data)
+            connection.status = 'Active'
+        else:
+            connection = AgentConnection(
+                wallet = wallet,
+                partner_name = partner_name,
+                invitation = invite_details_json,
+                connection_type = 'Inbound',
+                connection_data = json.dumps(connection_data),
+                status = 'Active')
+        connection.save()
     except:
         raise
     finally:
@@ -286,7 +312,7 @@ def send_connection_confirmation(config, partner_name, invite_details):
     return connection_data
 
 
-def check_connection_status(config, connection_data):
+def check_connection_status(wallet, config, partner_name, connection_data):
     print(" >>> Initialize libvcx with configuration")
     try:
         config_json = json.dumps(config)
@@ -307,6 +333,12 @@ def check_connection_status(config, connection_data):
         connection_data = run_coroutine(connection_to_.serialize)
         connection_to_.release()
         connection_to_ = None
+
+        connections = AgentConnection.objects.filter(wallet=wallet, partner_name=partner_name).all()
+        connection = connections[0]
+        connection.connection_data = json.dumps(connection_data)
+        connection.status = return_state
+        connection.save()
     except:
         raise
     finally:
@@ -536,11 +568,11 @@ def handle_inbound_messages(my_wallet, config, my_connection):
             print("Check for and receive offers")
             offers = run_coroutine_with_args(Credential.get_offers, connection_to_)
             for offer in offers:
-                already_handled = VcxConversation.objects.filter(message_id=offer[0]['msg_ref_id']).all()
+                already_handled = AgentConversation.objects.filter(message_id=offer[0]['msg_ref_id']).all()
                 if len(already_handled) == 0:
                     save_offer = offer[0].copy()
                     offer_data = json.dumps(save_offer)
-                    new_offer = VcxConversation(
+                    new_offer = AgentConversation(
                                         wallet_name = my_wallet,
                                         connection_partner_name = my_connection.partner_name,
                                         conversation_type = "CredentialOffer",
@@ -555,11 +587,11 @@ def handle_inbound_messages(my_wallet, config, my_connection):
         print("Check for and handle proof requests")
         requests = run_coroutine_with_args(DisclosedProof.get_requests, connection_to_)
         for request in requests:
-            already_handled = VcxConversation.objects.filter(message_id=request['msg_ref_id']).all()
+            already_handled = AgentConversation.objects.filter(message_id=request['msg_ref_id']).all()
             if len(already_handled) == 0:
                 save_request = request.copy()
                 request_data = json.dumps(save_request)
-                new_request = VcxConversation(
+                new_request = AgentConversation(
                                     wallet_name = my_wallet,
                                     connection_partner_name = my_connection.partner_name,
                                     conversation_type = "ProofRequest",
@@ -720,7 +752,7 @@ def poll_message_conversations(my_wallet, config, my_connection):
         polled_count = 0
 
         # Any conversations of status 'Sent' are for bot processing ...
-        messages = VcxConversation.objects.filter(wallet_name=my_wallet, connection_partner_name=my_connection.partner_name, status='Sent')
+        messages = AgentConversation.objects.filter(wallet_name=my_wallet, connection_partner_name=my_connection.partner_name, status='Sent')
 
         for message in messages:
             count = poll_message_conversation(my_wallet, config, my_connection, message, initialize_vcx=False)
