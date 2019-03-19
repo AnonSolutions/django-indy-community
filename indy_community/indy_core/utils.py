@@ -3,6 +3,10 @@ import random
 import string
 
 
+######################################################################
+# a few random utilities
+######################################################################
+
 def random_int(low, high):
     return random.randint(low, high)
 
@@ -24,6 +28,14 @@ def random_an_string(length, contains_spaces=False):
         chars = string.ascii_uppercase + string.digits
     return ''.join(random.SystemRandom().choice(chars) for _ in range(length))
 
+def random_schema_version():
+    version = format("%d.%d.%d" % (random.randint(1, 101), random.randint(1, 101), random.randint(1, 101)))
+    return version
+
+
+######################################################################
+# coroutine utilities
+######################################################################
 
 def run_coroutine(coroutine):
     loop = asyncio.new_event_loop()
