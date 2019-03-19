@@ -121,13 +121,13 @@ def create_schema_json(schema_name, schema_version, schema_attrs):
 
 
 # TODO for now just create a random schema and creddef
-def create_schema(wallet, config, schema_json, schema_template):
+def create_schema(wallet, schema_json, schema_template):
     """
     Create a schema (VCX) and also store in our local database
     """
     print(" >>> Initialize libvcx with trustee configuration")
     try:
-        config_json = json.dumps(config)
+        config_json = wallet.wallet_config
         run_coroutine_with_args(vcx_init_with_config, config_json)
     except:
         raise
@@ -161,14 +161,14 @@ def create_schema(wallet, config, schema_json, schema_template):
 
 
 # TODO for now just create a random schema and creddef
-def create_creddef(wallet, config, indy_schema, creddef_name, creddef_template):
+def create_creddef(wallet, indy_schema, creddef_name, creddef_template):
     """
     Create a credential definition (VCX) and also store in our local database
     """
     # wallet specific-configuration for creatig the cred def
     print(" >>> Initialize libvcx with wallet-specific configuration")
     try:
-        config_json = json.dumps(config)
+        config_json = wallet.wallet_config
         run_coroutine_with_args(vcx_init_with_config, config_json)
     except:
         raise
@@ -225,10 +225,10 @@ def create_proof_request(name, description, attrs, predicates):
 # utilities to create and confirm agent-to-agent connections
 ######################################################################
 
-def send_connection_invitation(wallet, config, partner_name):
+def send_connection_invitation(wallet, partner_name):
     print(" >>> Initialize libvcx with new configuration for a connection to", partner_name)
     try:
-        config_json = json.dumps(config)
+        config_json = wallet.wallet_config
         run_coroutine_with_args(vcx_init_with_config, config_json)
     except:
         raise
@@ -263,21 +263,20 @@ def send_connection_invitation(wallet, config, partner_name):
             raise
 
     print(" >>> Done!!!")
-    return connection_data, invite_details
+    return connection
 
 
-def send_connection_confirmation(wallet, config, partner_name, invite_details):
+def send_connection_confirmation(wallet, partner_name, invite_details):
     print(" >>> Initialize libvcx with configuration")
     try:
-        config_json = json.dumps(config)
+        config_json = wallet.wallet_config
         run_coroutine_with_args(vcx_init_with_config, config_json)
     except:
         raise
 
     # create connection and generate invitation
     try:
-        invite_details_json = json.dumps(invite_details)
-        connection_from_ = run_coroutine_with_args(Connection.create_with_details, partner_name, invite_details_json)
+        connection_from_ = run_coroutine_with_args(Connection.create_with_details, partner_name, invite_details)
         run_coroutine_with_args(connection_from_.connect, '{"use_public_did": true}')
         run_coroutine(connection_from_.update_state)
 
@@ -294,7 +293,7 @@ def send_connection_confirmation(wallet, config, partner_name, invite_details):
             connection = AgentConnection(
                 wallet = wallet,
                 partner_name = partner_name,
-                invitation = invite_details_json,
+                invitation = invite_details,
                 connection_type = 'Inbound',
                 connection_data = json.dumps(connection_data),
                 status = 'Active')
@@ -309,20 +308,20 @@ def send_connection_confirmation(wallet, config, partner_name, invite_details):
             raise
 
     print(" >>> Done!!!")
-    return connection_data
+    return connection
 
 
-def check_connection_status(wallet, config, partner_name, connection_data):
+def check_connection_status(wallet, connection):
     print(" >>> Initialize libvcx with configuration")
     try:
-        config_json = json.dumps(config)
+        config_json = wallet.wallet_config
         run_coroutine_with_args(vcx_init_with_config, config_json)
     except:
         raise
 
     # create connection and check status
     try:
-        connection_to_ = run_coroutine_with_args(Connection.deserialize, connection_data)
+        connection_to_ = run_coroutine_with_args(Connection.deserialize, json.loads(connection.connection_data))
         run_coroutine(connection_to_.update_state)
         connection_state = run_coroutine(connection_to_.get_state)
         if connection_state == State.Accepted:
@@ -334,7 +333,7 @@ def check_connection_status(wallet, config, partner_name, connection_data):
         connection_to_.release()
         connection_to_ = None
 
-        connections = AgentConnection.objects.filter(wallet=wallet, partner_name=partner_name).all()
+        connections = AgentConnection.objects.filter(wallet=wallet, partner_name=connection.partner_name).all()
         connection = connections[0]
         connection.connection_data = json.dumps(connection_data)
         connection.status = return_state
@@ -349,35 +348,44 @@ def check_connection_status(wallet, config, partner_name, connection_data):
             raise
 
     print(" >>> Done!!!")
-    return connection_data, return_state
+    return connection
 
 
 ######################################################################
 # utilities to offer, request, send and receive credentials
 ######################################################################
 
-def send_credential_offer(wallet, config, connection_data, partner_name, credential_tag, schema_attrs, cred_def, credential_name):
-    print(" >>> Initialize libvcx with new configuration for a cred offer to", partner_name)
+def send_credential_offer(wallet, connection, credential_tag, schema_attrs, cred_def, credential_name):
+    print(" >>> Initialize libvcx with new configuration for a cred offer to", connection.partner_name)
     try:
-        config_json = json.dumps(config)
+        config_json = wallet.wallet_config
         run_coroutine_with_args(vcx_init_with_config, config_json)
     except:
         raise
 
     # create connection and generate invitation
     try:
-        my_connection = run_coroutine_with_args(Connection.deserialize, connection_data)
+        my_connection = run_coroutine_with_args(Connection.deserialize, json.loads(connection.connection_data))
         my_cred_def = run_coroutine_with_args(CredentialDef.deserialize, json.loads(cred_def.creddef_data))
         cred_def_handle = my_cred_def.handle
 
         # create a credential (the last '0' is the 'price')
-        credential = run_coroutine_with_args(IssuerCredential.create, credential_tag, json.loads(schema_attrs), int(cred_def_handle), credential_name, '0')
+        credential = run_coroutine_with_args(IssuerCredential.create, credential_tag, schema_attrs, int(cred_def_handle), credential_name, '0')
 
-        print("Issue credential offer to", partner_name)
+        print("Issue credential offer to", connection.partner_name)
         run_coroutine_with_args(credential.send_offer, my_connection)
 
         # serialize/deserialize credential - waiting for Alice to rspond with Credential Request
         credential_data = run_coroutine(credential.serialize)
+
+        conversation = AgentConversation(
+            wallet = wallet,
+            connection_partner_name = connection.partner_name,
+            conversation_type = 'CredentialOffer',
+            message_id = 'N/A',
+            status = 'Sent',
+            conversation_data = json.dumps(credential_data))
+        conversation.save()
     except:
         raise
     finally:
@@ -388,24 +396,24 @@ def send_credential_offer(wallet, config, connection_data, partner_name, credent
             raise
 
     print(" >>> Done!!!")
-    return credential_data
+    return conversation
     
 
-def send_credential_request(wallet, config, connection_data, partner_name, my_conversation):
-    print(" >>> Initialize libvcx with new configuration for a cred offer to", partner_name)
+def send_credential_request(wallet, connection, conversation):
+    print(" >>> Initialize libvcx with new configuration for a cred offer to", connection.partner_name)
     try:
-        config_json = json.dumps(config)
+        config_json = wallet.wallet_config
         run_coroutine_with_args(vcx_init_with_config, config_json)
     except:
         raise
 
     # create connection and generate invitation
     try:
-        my_connection = run_coroutine_with_args(Connection.deserialize, connection_data)
+        my_connection = run_coroutine_with_args(Connection.deserialize, json.loads(connection.connection_data))
         #my_offer = run_coroutine_with_args()
     
         print("Create a credential object from the credential offer")
-        offer_json = [json.loads(my_conversation.conversation_data),]
+        offer_json = [json.loads(conversation.conversation_data),]
         credential = run_coroutine_with_args(Credential.create, 'credential', offer_json)
 
         print("After receiving credential offer, send credential request")
@@ -413,6 +421,11 @@ def send_credential_request(wallet, config, connection_data, partner_name, my_co
 
         # serialize/deserialize credential - wait for Faber to send credential
         credential_data = run_coroutine(credential.serialize)
+
+        conversation.status = 'Sent'
+        conversation.conversation_data = json.dumps(credential_data)
+        conversation.conversation_type = 'CredentialRequest'
+        conversation.save()
     except:
         raise
     finally:
@@ -423,17 +436,17 @@ def send_credential_request(wallet, config, connection_data, partner_name, my_co
             raise
 
     print(" >>> Done!!!")
-    return credential_data
+    return conversation
 
 
 ######################################################################
 # utilities to request, send and receive proofs
 ######################################################################
 
-def send_proof_request(wallet, config, connection_data, partner_name, proof_uuid, proof_name, proof_attrs, proof_predicates):
+def send_proof_request(wallet, connection_data, partner_name, proof_uuid, proof_name, proof_attrs, proof_predicates):
     print(" >>> Initialize libvcx with new configuration for a cred offer to", partner_name)
     try:
-        config_json = json.dumps(config)
+        config_json = wallet.wallet_config
         run_coroutine_with_args(vcx_init_with_config, config_json)
     except:
         raise
@@ -464,10 +477,10 @@ def send_proof_request(wallet, config, connection_data, partner_name, proof_uuid
     return proof_data
 
 
-def get_claims_for_proof_request(wallet, config, connection_data, partner_name, my_conversation):
+def get_claims_for_proof_request(wallet, connection_data, partner_name, my_conversation):
     print(" >>> Initialize libvcx with new configuration for a cred offer to", partner_name)
     try:
-        config_json = json.dumps(config)
+        config_json = wallet.wallet_config
         run_coroutine_with_args(vcx_init_with_config, config_json)
     except:
         raise
@@ -497,10 +510,10 @@ def get_claims_for_proof_request(wallet, config, connection_data, partner_name, 
     return (creds_for_proof, proof_data)
 
 
-def send_claims_for_proof_request(wallet, config, connection_data, partner_name, my_conversation, credential_attrs):
+def send_claims_for_proof_request(wallet, connection_data, partner_name, my_conversation, credential_attrs):
     print(" >>> Initialize libvcx with new configuration for a cred offer to", partner_name)
     try:
-        config_json = json.dumps(config)
+        config_json = wallet.wallet_config
         run_coroutine_with_args(vcx_init_with_config, config_json)
     except:
         raise
@@ -551,10 +564,10 @@ def send_claims_for_proof_request(wallet, config, connection_data, partner_name,
 # utilities to poll for and process outstanding messages
 ######################################################################
 
-def handle_inbound_messages(my_wallet, config, my_connection):
+def handle_inbound_messages(my_wallet, my_connection):
     print(" >>> Initialize libvcx with configuration")
     try:
-        config_json = json.dumps(config)
+        config_json = my_wallet.wallet_config
         run_coroutine_with_args(vcx_init_with_config, config_json)
     except:
         raise
@@ -573,7 +586,7 @@ def handle_inbound_messages(my_wallet, config, my_connection):
                     save_offer = offer[0].copy()
                     offer_data = json.dumps(save_offer)
                     new_offer = AgentConversation(
-                                        wallet_name = my_wallet,
+                                        wallet = my_wallet,
                                         connection_partner_name = my_connection.partner_name,
                                         conversation_type = "CredentialOffer",
                                         message_id = save_offer['msg_ref_id'],
@@ -592,7 +605,7 @@ def handle_inbound_messages(my_wallet, config, my_connection):
                 save_request = request.copy()
                 request_data = json.dumps(save_request)
                 new_request = AgentConversation(
-                                    wallet_name = my_wallet,
+                                    wallet = my_wallet,
                                     connection_partner_name = my_connection.partner_name,
                                     conversation_type = "ProofRequest",
                                     message_id = save_request['msg_ref_id'],
@@ -603,9 +616,9 @@ def handle_inbound_messages(my_wallet, config, my_connection):
                 new_request.save()
                 handled_count = handled_count + 1
     except:
-        # TODO ignore polling errors for now ...
-        #raise
         print("Error polling offers and proof requests")
+        # TODO ignore polling errors for now ...
+        raise
         pass
     finally:
         print(" >>> Shutdown vcx (for now)")
@@ -619,11 +632,11 @@ def handle_inbound_messages(my_wallet, config, my_connection):
     return handled_count
 
 
-def poll_message_conversation(my_wallet, config, my_connection, message, initialize_vcx=True):
+def poll_message_conversation(my_wallet, my_connection, message, initialize_vcx=True):
     if initialize_vcx:
         print(" >>> Initialize libvcx with configuration")
         try:
-            config_json = json.dumps(config)
+            config_json = my_wallet.wallet_config
             run_coroutine_with_args(vcx_init_with_config, config_json)
         except:
             raise
@@ -632,8 +645,6 @@ def poll_message_conversation(my_wallet, config, my_connection, message, initial
         print(" ... Checking message", message.message_id, message.conversation_type)
 
         connection = run_coroutine_with_args(Connection.deserialize, json.loads(my_connection.connection_data))
-
-        polled_count = 0
 
         # handle based on message type and status:
         if message.conversation_type == 'CredentialOffer':
@@ -722,8 +733,6 @@ def poll_message_conversation(my_wallet, config, my_connection, message, initial
         else:
             print("Error unknown conversation type", message.message_id, message.conversation_type)
 
-        polled_count = polled_count + 1
-
         pass
     except:
         raise
@@ -737,13 +746,13 @@ def poll_message_conversation(my_wallet, config, my_connection, message, initial
 
     print(" >>> Done!!!")
 
-    return polled_count
+    return message
 
 
-def poll_message_conversations(my_wallet, config, my_connection):
+def poll_message_conversations(my_wallet, my_connection):
     print(" >>> Initialize libvcx with configuration")
     try:
-        config_json = json.dumps(config)
+        config_json = my_wallet.wallet_config
         run_coroutine_with_args(vcx_init_with_config, config_json)
     except:
         raise

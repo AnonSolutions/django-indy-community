@@ -8,6 +8,7 @@ from django.conf import settings
 
 from indy import anoncreds, crypto, did, ledger, pool, wallet
 from indy.error import ErrorCode, IndyError
+from indy.anoncreds import prover_search_credentials, prover_fetch_credentials, prover_close_credentials_search
 
 from .models import *
 from .utils import *
@@ -113,4 +114,20 @@ def wallet_credentials(raw_password):
     wallet_credentials['storage_credentials'] = storage_credentials
     wallet_credentials_json = json.dumps(wallet_credentials)
     return wallet_credentials_json
+
+
+def list_wallet_credentials(wallet):
+    # for now, we have our secret password in our wallet config
+    wallet_name = wallet.wallet_name
+    wallet_config = json.loads(wallet.wallet_config)
+    raw_password = wallet_config['wallet_key']
+    wallet_handle = open_wallet(wallet_name, raw_password)
+
+    (search_handle, search_count) = run_coroutine_with_args(prover_search_credentials, wallet_handle, "{}")
+    credentials = run_coroutine_with_args(prover_fetch_credentials, search_handle, search_count)
+    run_coroutine_with_args(prover_close_credentials_search, search_handle)
+
+    close_wallet(wallet_handle)
+
+    return json.loads(credentials)
 
