@@ -443,8 +443,8 @@ def send_credential_request(wallet, connection, conversation):
 # utilities to request, send and receive proofs
 ######################################################################
 
-def send_proof_request(wallet, connection_data, partner_name, proof_uuid, proof_name, proof_attrs, proof_predicates):
-    print(" >>> Initialize libvcx with new configuration for a cred offer to", partner_name)
+def send_proof_request(wallet, connection, proof_uuid, proof_name, proof_attrs, proof_predicates):
+    print(" >>> Initialize libvcx with new configuration for a cred offer to", connection.partner_name)
     try:
         config_json = wallet.wallet_config
         run_coroutine_with_args(vcx_init_with_config, config_json)
@@ -453,10 +453,10 @@ def send_proof_request(wallet, connection_data, partner_name, proof_uuid, proof_
 
     # create connection and generate invitation
     try:
-        my_connection = run_coroutine_with_args(Connection.deserialize, connection_data)
+        my_connection = run_coroutine_with_args(Connection.deserialize, json.loads(connection.connection_data))
 
         # create a proof request
-        proof = run_coroutine_with_kwargs(Proof.create, proof_uuid, proof_name, json.loads(proof_attrs), {}, requested_predicates=json.loads(proof_predicates))
+        proof = run_coroutine_with_kwargs(Proof.create, proof_uuid, proof_name, proof_attrs, {}, requested_predicates=proof_predicates)
 
         proof_data = run_coroutine(proof.serialize)
 
@@ -464,6 +464,15 @@ def send_proof_request(wallet, connection_data, partner_name, proof_uuid, proof_
 
         # serialize/deserialize credential - waiting for Alice to rspond with Credential Request
         proof_data = run_coroutine(proof.serialize)
+
+        conversation = AgentConversation(
+            wallet = wallet,
+            connection_partner_name = connection.partner_name,
+            conversation_type = 'ProofRequest',
+            message_id = 'N/A',
+            status = 'Sent',
+            conversation_data = json.dumps(proof_data))
+        conversation.save()
     except:
         raise
     finally:
@@ -474,11 +483,11 @@ def send_proof_request(wallet, connection_data, partner_name, proof_uuid, proof_
             raise
 
     print(" >>> Done!!!")
-    return proof_data
+    return conversation
 
 
-def get_claims_for_proof_request(wallet, connection_data, partner_name, my_conversation):
-    print(" >>> Initialize libvcx with new configuration for a cred offer to", partner_name)
+def get_claims_for_proof_request(wallet, connection, my_conversation):
+    print(" >>> Initialize libvcx with new configuration for a cred offer to", connection.partner_name)
     try:
         config_json = wallet.wallet_config
         run_coroutine_with_args(vcx_init_with_config, config_json)
@@ -487,16 +496,12 @@ def get_claims_for_proof_request(wallet, connection_data, partner_name, my_conve
 
     # create connection and generate invitation
     try:
-        my_connection = run_coroutine_with_args(Connection.deserialize, connection_data)
+        my_connection = run_coroutine_with_args(Connection.deserialize, json.loads(connection.connection_data))
 
         # create a proof request
         proof = run_coroutine_with_args(DisclosedProof.create, 'proof', json.loads(my_conversation.conversation_data))
 
         creds_for_proof = run_coroutine(proof.get_creds)
-
-        # serialize/deserialize proof 
-        proof_data = run_coroutine(proof.serialize)
-
     except:
         raise
     finally:
@@ -507,11 +512,17 @@ def get_claims_for_proof_request(wallet, connection_data, partner_name, my_conve
             raise
 
     print(" >>> Done!!!")
-    return (creds_for_proof, proof_data)
+    return creds_for_proof
 
 
-def send_claims_for_proof_request(wallet, connection_data, partner_name, my_conversation, credential_attrs):
-    print(" >>> Initialize libvcx with new configuration for a cred offer to", partner_name)
+def cred_for_schema_id(creds_for_proof, attr, schema_id):
+    for cred in creds_for_proof['attrs'][attr]:
+        if schema_id == cred['cred_info']['schema_id']:
+            return cred
+    return None
+
+def send_claims_for_proof_request(wallet, connection, my_conversation, credential_attrs):
+    print(" >>> Initialize libvcx with new configuration for a cred offer to", connection.partner_name)
     try:
         config_json = wallet.wallet_config
         run_coroutine_with_args(vcx_init_with_config, config_json)
@@ -520,22 +531,21 @@ def send_claims_for_proof_request(wallet, connection_data, partner_name, my_conv
 
     # create connection and generate invitation
     try:
-        my_connection = run_coroutine_with_args(Connection.deserialize, connection_data)
+        my_connection = run_coroutine_with_args(Connection.deserialize, json.loads(connection.connection_data))
 
         # load proof request
         proof = run_coroutine_with_args(DisclosedProof.create, 'proof', json.loads(my_conversation.conversation_data))
         creds_for_proof = run_coroutine(proof.get_creds)
 
         self_attested = {}
-
         for attr in creds_for_proof['attrs']:
             selected = credential_attrs[attr]
-            if 0 < len(creds_for_proof['attrs'][attr]) and str.isdigit(selected):
+            if 'schema_id' in selected:
                 creds_for_proof['attrs'][attr] = {
-                    'credential': creds_for_proof['attrs'][attr][int(selected)]
+                    'credential': cred_for_schema_id(creds_for_proof, attr, selected['schema_id'])
                 }
             else:
-                self_attested[attr] = selected
+                self_attested[attr] = selected['value']
 
         for attr in self_attested:
             del creds_for_proof['attrs'][attr]
