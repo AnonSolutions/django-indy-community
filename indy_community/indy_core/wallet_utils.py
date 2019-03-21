@@ -14,6 +14,9 @@ from .models import *
 from .utils import *
 
 
+######################################################################
+# basic wallet management utilities
+######################################################################
 def get_user_wallet_name(username):
     """
     Determine wallet name based on a user name (email)
@@ -130,4 +133,9 @@ def list_wallet_credentials(wallet):
     close_wallet(wallet_handle)
 
     return json.loads(credentials)
+
+
+######################################################################
+# basic wallet storage utilities (non-secrets interface)
+######################################################################
 
