@@ -10,7 +10,8 @@ from .views import *
 
 urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
-    path('signup/', signup_view, name='signup'),
+    path('signup/', user_signup_view, name='signup'),
+    path('org_signup/', org_signup_view, name='org_signup'),
     path('', auth_views.LoginView.as_view(), name='login'),
 ]
 
