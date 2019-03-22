@@ -139,3 +139,4 @@ def list_wallet_credentials(wallet):
 # basic wallet storage utilities (non-secrets interface)
 ######################################################################
 
+

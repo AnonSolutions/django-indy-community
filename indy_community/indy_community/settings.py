@@ -90,7 +90,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'indy_core.middleware.URLPermissionsMiddleware',
+    #'indy_core.middleware.URLPermissionsMiddleware',
 ]
 
 AUTHENTICATION_BACKENDS = ['indy_core.indyauth.IndyBackend']
