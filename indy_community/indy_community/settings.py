@@ -93,7 +93,7 @@ MIDDLEWARE = [
     #'indy_core.middleware.URLPermissionsMiddleware',
 ]
 
-AUTHENTICATION_BACKENDS = ['indy_core.indyauth.IndyBackend']
+#AUTHENTICATION_BACKENDS = ['indy_core.indyauth.IndyBackend']
 
 ROOT_URLCONF = 'indy_community.urls'
 
