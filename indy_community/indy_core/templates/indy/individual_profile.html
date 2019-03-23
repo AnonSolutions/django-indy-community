@@ -1,0 +1,115 @@
+{% extends 'base_nav.html' %}
+
+{% load i18n %}
+{% load static %}
+
+{% block main_content %}
+
+	<div class='profile profile-anon'>
+		<div class='profile-org-top-cont profile-anon-top-cont'>
+			<div class='profile-org-top-info-bar profile-anon-top-info-bar'>
+						<h2 class='profile-name'>User Name</h2>
+				<div class='profile-top-bar-right'>
+					<div class='btn btn-connect'><i class="fas fa-user-plus"></i>Connect</div>
+					<div class='btn btn-connect'><i class="fas fa-comment"></i>Message</div>
+				</div>
+			</div>
+		</div>
+
+		<div class='profile-bottom-cont profile-anon-bottom-cont'>
+			<div class='profile-nav-cont profile-anon-nav-cont'>
+				<div class='profile-nav'>
+					<div class='profile-nav-btn profile-nav-btn-wallet active-profile-nav'>
+						<h5>Wallet</h5><i class="fas fa-plus"></i>
+					</div>
+					<div class='profile-nav-btn profile-nav-btn-connections'>
+						<h5>Connections</h5><i class="fas fa-plus"></i>
+					</div>
+					<div class='profile-nav-btn profile-nav-btn-conversations'>
+						<h5>Conversations</h5><i class="fas fa-plus"></i>
+					</div>
+					<div class='profile-nav-btn profile-nav-btn-credentials'>
+						<h5>Credentials</h5><i class="fas fa-plus"></i>
+					</div>
+				</div>
+			</div>
+
+			<div class='profile-tab-cont'>
+				<div class='profile-search-input'>
+					<input placeholder='Search'>
+					<div class='btn btn-search-input'>
+						<i class='fas fa-search'></i>
+					</div>
+				</div>
+			<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+			
+				<div class='profile-tabs profile-tabs-wallet'>
+					<div id='profilewallet'>
+						{% include "indy/pageIncludes/profilewallet.html" %}
+					</div>
+				</div>
+				
+ 				<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+ 				
+				<div class='profile-tabs profile-tabs-connections'>
+					<div id='profileconnections'>
+						{% include "indy/pageIncludes/profileconnections.html" %}
+					</div>
+				</div>
+				
+				<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+				
+				<div class='profile-tabs profile-tabs-conversations'>
+					<div id='profileconversations'>
+						{% include "indy/pageIncludes/profileconversations.html" %}
+					</div>
+				</div>
+				
+				<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+				
+				<div class='profile-tabs profile-tabs-credentials'>
+					<div id='profilecredentials'>
+						{% include "indy/pageIncludes/profilecredentials.html" %}
+					</div>
+				</div>
+				
+				<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+				
+			</div>
+		</div>
+	</div>
+
+	<script>
+		$(document).ready(function() {
+			$(".profile-tabs").hide();
+			$(".profile-tabs-wallet").show();
+			
+			$(".profile-nav-btn").click(function() {
+				$(".profile-nav-btn").removeClass("active-profile-nav");
+				$(this).addClass("active-profile-nav");
+			});
+			
+			$(".profile-nav-btn-wallet").click(function() {
+				$(".profile-tabs").hide();
+				$(".profile-tabs-wallet").show();
+			});
+			
+			$(".profile-nav-btn-connections").click(function() {
+				$(".profile-tabs").hide();
+				$(".profile-tabs-connections").show();
+			});
+						
+			$(".profile-nav-btn-conversations").click(function() {
+				$(".profile-tabs").hide();
+				$(".profile-tabs-conversations").show();
+			});
+			
+			$(".profile-nav-btn-credentials").click(function() {
+				$(".profile-tabs").hide();
+				$(".profile-tabs-credentials").show();
+			});
+			
+		});
+	</script>
+
+{% endblock %}

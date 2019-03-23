@@ -90,10 +90,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    #'indy_core.middleware.URLPermissionsMiddleware',
     'indy_core.middleware.URLPermissionsMiddleware',
 ]
 
-AUTHENTICATION_BACKENDS = ['indy_core.indyauth.IndyBackend']
+#AUTHENTICATION_BACKENDS = ['indy_core.indyauth.IndyBackend']
 
 ROOT_URLCONF = 'indy_community.urls'
 
@@ -118,6 +119,11 @@ TEMPLATES = [
 WSGI_APPLICATION = 'indy_community.wsgi.application'
 
 LOGOUT_REDIRECT_URL = '/'
+URL_NAMESPACE_PATHS = (r'^(/[^/]+)?/(individual|organization)($|/.*$)',)
+URL_NAMESPACE_PERMISSIONS = {
+    'individual': ('User',),
+    'organization': ('Admin',),
+}
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
