@@ -23,6 +23,8 @@ def user_provision(user, raw_password):
     user.wallet = wallet
     user.save()
 
+    return user
+
 
 def org_provision(org, raw_password, org_role=''):
     """
@@ -47,6 +49,8 @@ def org_provision(org, raw_password, org_role=''):
     org.wallet = wallet
     org.save()
 
+    return org
+
 
 def org_signup(user, raw_password, org_name, org_role=''):
     """
@@ -54,7 +58,7 @@ def org_signup(user, raw_password, org_name, org_role=''):
     """
     org = IndyOrganization.objects.create(org_name=org_name)
 
-    org_provision(org, raw_password, org_role)
+    org = org_provision(org, raw_password, org_role)
 
     # associate the user with the org
     relation = IndyOrgRelationship.objects.create(org=org, user=user)

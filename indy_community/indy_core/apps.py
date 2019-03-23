@@ -105,6 +105,9 @@ class IndyCoreConfig(AppConfig):
     name = 'indy_core'
 
     def ready(self):
+        # import login/logout signals
+        import indy_core.signals
+
         pg_dll = settings.INDY_CONFIG['storage_dll']
         pg_entrypoint = settings.INDY_CONFIG['storage_entrypoint']
         print('Loading {}'.format(pg_dll))
