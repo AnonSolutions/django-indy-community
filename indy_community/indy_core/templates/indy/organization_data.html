@@ -4,9 +4,9 @@
 {% load static %}
 
 {% block profile_content %}
-	<div class='profile-tabs profile-tabs-profile'>
-		<div id='profileprofile'>
-			TBD
+	<div class='profile-tabs profile-tabs-data'>
+		<div id='profiledata'>
+			{% include "indy/pageIncludes/profileuserdata.html" %}
 		</div>
 	</div>
 {% endblock %}
@@ -14,8 +14,8 @@
 {% block profile_script %}
 	<script>
 		$(document).ready(function() {
-			$(".profile-tabs-profile").show();
-			$(".profile-nav-btn-profile").addClass("active-profile-nav");
+			$(".profile-tabs-data").show();
+			$(".profile-nav-btn-data").addClass("active-profile-nav");
 		});
 	</script>
 {% endblock %}

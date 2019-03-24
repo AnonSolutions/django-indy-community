@@ -6,12 +6,39 @@
 	<div class='topnav'>
 		<div class='topnav-con topnav-title'>
 			<div class='topnav-item'>
+            {% if request.user.is_authenticated %}
+                {% with request.session.URL_NAMESPACE as namespace %}
+	                <a href="{% url namespace|add:'profile' %}">
+	                   <img src="{% static "/anon/Anon5-letters.png" %}">
+	                </a>
+                {% endwith %}
+            {% else %}
+                <a href="{% url 'login' %}">
+                   <img src="{% static "/anon/Anon5-letters.png" %}">
+                </a>
+            {% endif %}
 			</div>
 		</div>
 
 		<div class='topnav-con'>
-			<div class='topnav-item'>
-			</div>
+			{% if request.user.is_authenticated %}
+				{% with request.session.URL_NAMESPACE as namespace %}
+					<div class='topnav-item topnav-accountnamecon'>
+						<a href="{% url namespace|add:'profile' %}">
+							{{ request.user }} 
+                            {% if request.session.ACTIVE_ROLE %}
+                               [ {{ request.session.ACTIVE_ROLE }} ]
+                            {% endif %}
+                            {% if request.session.ACTIVE_ORG %}
+                              [ {{ request.session.ACTIVE_ORG }} ]
+                            {% endif %}
+						</a>
+					</div>
+				</div> <!-- top nav right container ends -->
+				{% endwith %}
+			{% else %}
+				<!-- TODO anon user -->
+			{% endif %}
 		</div>
 	</div> <!-- top nav ends -->
 
