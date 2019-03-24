@@ -110,6 +110,33 @@ def handle_wallet_logout(request):
 def individual_profile_view(request):
     return render(request, 'indy/individual_profile.html')
 
+def individual_wallet_view(request):
+    return render(request, 'indy/individual_wallet.html')
+
+def individual_connections_view(request):
+    return render(request, 'indy/individual_connections.html')
+
+def individual_conversations_view(request):
+    return render(request, 'indy/individual_conversations.html')
+
+def individual_credentials_view(request):
+    return render(request, 'indy/individual_credentials.html')
+
 def organization_profile_view(request):
     return render(request, 'indy/organization_profile.html')
+
+def organization_data_view(request):
+    return render(request, 'indy/organization_data.html')
+
+def organization_wallet_view(request):
+    return render(request, 'indy/organization_wallet.html')
+
+def organization_connections_view(request):
+    return render(request, 'indy/organization_connections.html')
+
+def organization_conversations_view(request):
+    return render(request, 'indy/organization_conversations.html')
+
+def organization_credentials_view(request):
+    return render(request, 'indy/organization_credentials.html')
 

@@ -19,6 +19,10 @@ urlpatterns = [
 individualpatterns = [
     path('', include([
         path('profile/', individual_profile_view, name='profile'),
+        path('wallet/', individual_wallet_view, name='wallet'),
+        path('connections/', individual_connections_view, name='connections'),
+        path('conversations/', individual_conversations_view, name='conversations'),
+        path('credentials/', individual_credentials_view, name='credentials'),
         ])),
 ]
 
@@ -26,6 +30,11 @@ individualpatterns = [
 organizationpatterns = [
     path('', include([
         path('profile/', organization_profile_view, name='profile'),
+        path('data/', organization_data_view, name='org_data'),
+        path('wallet/', organization_wallet_view, name='wallet'),
+        path('connections/', organization_connections_view, name='connections'),
+        path('conversations/', organization_conversations_view, name='conversations'),
+        path('credentials/', organization_credentials_view, name='credentials'),
         ])),
 ]
 
