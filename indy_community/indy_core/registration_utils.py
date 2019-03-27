@@ -26,7 +26,7 @@ def user_provision(user, raw_password):
     return user
 
 
-def org_provision(org, raw_password, org_role=''):
+def org_provision(org, raw_password, org_role=None):
     """
     Create a new org wallet and associate to the org
     """
@@ -49,14 +49,20 @@ def org_provision(org, raw_password, org_role=''):
     org.wallet = wallet
     org.save()
 
+    # if the org has a role, check if there are any schemas associated with that role
+    if org_role:
+        role_schemas = IndySchema.objects.filter(roles=org_role).all()
+        for schema in role_schemas:
+            creddef = create_creddef(org.wallet, schema, schema.schema_name + '-' + org.wallet.wallet_name, schema.schema_template)
+
     return org
 
 
-def org_signup(user, raw_password, org_name, org_role=''):
+def org_signup(user, raw_password, org_name, org_role=None):
     """
     Helper method to create and provision a new org, and associate to the current user
     """
-    org = IndyOrganization.objects.create(org_name=org_name)
+    org = IndyOrganization.objects.create(org_name=org_name, role=org_role)
 
     org = org_provision(org, raw_password, org_role)
 

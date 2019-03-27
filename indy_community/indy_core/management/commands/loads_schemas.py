@@ -63,6 +63,15 @@ class Command(BaseCommand):
                     (schema_json, creddef_template) = create_schema_json(name, version, attributes)
                     schema = create_schema(org.wallet, schema_json, creddef_template)
                     self.stdout.write("Created schema for %s" % name)
+
+                    # add role(s) to this schema
+                    if 'issuing_roles' in spec:
+                        for role_name in spec['issuing_roles']:
+                            role, created = IndyOrgRole.objects.get_or_create(name=role_name)
+                            schema.roles.add(role)
+                        schema.save()
+
+                    # add cred def?
                     if options['cred_defs']:
                         creddef = create_creddef(org.wallet, schema, schema.schema_name + '-' + org.wallet.wallet_name, schema.schema_template)
                         self.stdout.write("Created cred def for schema %s" % name)
