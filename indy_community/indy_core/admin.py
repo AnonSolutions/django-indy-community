@@ -4,6 +4,7 @@ from .models import *
 
 
 admin.site.register(IndyUser)
+admin.site.register(IndyOrgRole)
 admin.site.register(IndyOrganization)
 admin.site.register(IndyOrgRelationship)
 admin.site.register(IndyWallet)

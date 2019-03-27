@@ -56,7 +56,8 @@ def org_signup_view(request):
 
             # create and provision org, including org wallet
             org_name = form.cleaned_data.get('org_name')
-            org_role = ''
+            org_role_name = form.cleaned_data.get('org_role_name')
+            org_role, created = IndyOrgRole.objects.get_or_create(name=org_role_name)
             org = org_signup(user, raw_password, org_name, org_role)
 
             # TODO need to auto-login with Atria custom user
@@ -139,4 +140,25 @@ def organization_conversations_view(request):
 
 def organization_credentials_view(request):
     return render(request, 'indy/organization_credentials.html')
+
+
+######################################################################
+# views to create and confirm agent-to-agent connections
+######################################################################
+
+
+######################################################################
+# views to offer, request, send and receive credentials
+######################################################################
+
+
+######################################################################
+# views to request, send and receive proofs
+######################################################################
+
+
+######################################################################
+# views to list wallet credentials
+######################################################################
+
 

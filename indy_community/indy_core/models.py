@@ -99,10 +99,18 @@ class IndyUser(AbstractBaseUser, PermissionsMixin):
         return self.groups.filter(name=role).exists()
 
 
+# Roles to which an organization can belong
+class IndyOrgRole(models.Model):
+    name = models.CharField(max_length=40, unique=True)
+
+    def __str__(self):
+        return self.name
+
 # Base class for organizations that use the Indy platform
 class IndyOrganization(models.Model):
     org_name = models.CharField(max_length=40, unique=True)
     wallet = models.ForeignKey(IndyWallet, to_field="wallet_name", blank = True, null=True, on_delete=models.CASCADE)
+    role = models.ForeignKey(IndyOrgRole, blank = True, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.org_name
@@ -130,6 +138,8 @@ class IndySchema(models.Model):
     schema = models.TextField(max_length=4000)
     schema_template = models.TextField(max_length=4000)
     schema_data = models.TextField(max_length=4000)
+    # orgs which contain these role(s) will automatically get cred defs created for this schema
+    roles = models.ManyToManyField(IndyOrgRole)
 
     def __str__(self):
         return self.schema_name
