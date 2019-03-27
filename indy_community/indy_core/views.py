@@ -140,3 +140,24 @@ def organization_conversations_view(request):
 def organization_credentials_view(request):
     return render(request, 'indy/organization_credentials.html')
 
+
+######################################################################
+# views to create and confirm agent-to-agent connections
+######################################################################
+
+
+######################################################################
+# views to offer, request, send and receive credentials
+######################################################################
+
+
+######################################################################
+# views to request, send and receive proofs
+######################################################################
+
+
+######################################################################
+# views to list wallet credentials
+######################################################################
+
+
