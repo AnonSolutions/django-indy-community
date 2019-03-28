@@ -69,7 +69,7 @@ class IndyUser(AbstractBaseUser, PermissionsMixin):
     )
     date_joined = models.DateTimeField(default=timezone.now)
     last_login = models.DateTimeField(blank=True, null=True)
-    wallet = models.ForeignKey(IndyWallet, to_field="wallet_name", blank = True, null=True, on_delete=models.CASCADE)
+    wallet = models.ForeignKey(IndyWallet, to_field="wallet_name", related_name='wallet_user', blank = True, null=True, on_delete=models.CASCADE)
 
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'email'
@@ -109,7 +109,7 @@ class IndyOrgRole(models.Model):
 # Base class for organizations that use the Indy platform
 class IndyOrganization(models.Model):
     org_name = models.CharField(max_length=40, unique=True)
-    wallet = models.ForeignKey(IndyWallet, to_field="wallet_name", blank = True, null=True, on_delete=models.CASCADE)
+    wallet = models.ForeignKey(IndyWallet, to_field="wallet_name", related_name='wallet_org', blank = True, null=True, on_delete=models.CASCADE)
     role = models.ForeignKey(IndyOrgRole, blank = True, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
