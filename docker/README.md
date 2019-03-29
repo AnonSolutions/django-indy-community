@@ -1,8 +1,9 @@
 # Install and run Django Indy Community
 
-There are two options to run the environment locally - running in docker (recommended) or running all the services locally.
+There are two options to run the environment locally - running in docker (recommended) or running all the services locally on "bare metal".
 
-## Running Django Indy Community - Docker Version
+
+## Running Django Indy Community - Docker Version (recommended)
 
 1. Open two bash shells, and run the following commands:
 
@@ -13,12 +14,12 @@ cd von-network
 ./manage start
 ```
 
-... and:
+... and in the second shell:
 
 ```bash
 git clone https://github.com/AnonSolutions/django-indy-community.git
 cd django-indy-community/docker
-./base-image  # note this takes about 30 mintues
+./base-image      # note that this takes about 30 mintues
 ./manage start
 ```
 
@@ -58,7 +59,7 @@ source venv/bin/activate
 pip install -r server/requirements.txt
 ```
 
-2. In the indy-sdk repository, build all necessary libraries (check the indy-sdk repo for dependencies, such as rust):
+2. In the indy-sdk repository, build all necessary libraries (Note: check out the [indy-sdk repo](https://github.com/hyperledger/indy-sdk) for dependencies, such as rust):
 
 ```bash
 cd indy-sdk
@@ -126,7 +127,7 @@ cd django-indy-community/indy_community
 python manage.py process_tasks
 ```
 
-6. Whew!  One more - start up the von-network ledger browser - this also provides the capability to register DID's on the ledger for our Atria organizations:
+6. Whew!  One more - start up the von-network ledger browser - this also provides the capability to register DID's on the ledger for our Test organizations:
 
 ```bash
 cd von-network
@@ -146,7 +147,7 @@ To reset the environment and start from scratch:
 rm -rf ~/.indy_client/
 ```
 
-2. Kill the two Atria processes (CTRL-C) and reload the Atria database:
+2. Kill the two Django processes (CTRL-C) and reload the Test database:
 
 ```bash
 cd django-indy-community/indy_community

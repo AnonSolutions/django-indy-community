@@ -15,6 +15,12 @@ def url_namespace(role):
         return 'individual:'
 
 
+def namespaced_template(request, path):
+    namespace = request.session['URL_NAMESPACE']
+    namespace = namespace.replace(':', '')
+    return 'indy/' + namespace + '/' + path
+
+
 def user_wallet_logged_in_handler(request, user, wallet_name):
     print("Login wallet, {} {} {}".format(user.email, request.session.session_key, wallet_name))
     (session, session_created) = IndySession.objects.get_or_create(user=user, session_id=request.session.session_key)
