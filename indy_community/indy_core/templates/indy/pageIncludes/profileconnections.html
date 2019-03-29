@@ -36,12 +36,12 @@
         			<h5>Connection Type: {{ connection.connection_type }}</h5>
         		</div>
         		<div>
-        			<h5>Connection Status: {{ connection.connection_status }}
+        			<h5>Connection Status: {{ connection.status }}
         		        {% if connection.status == 'Pending' %}
-        		            {{connection.status}} <a href="{% url namespace|add:'connection_response' %}?id={{connection.id}}"}>Respond</a>
+        		            <a href="{% url namespace|add:'connection_response' %}?id={{connection.id}}"}>Respond</a>
         		        {% endif %}
         		        {% if connection.status == 'Sent' %}
-        		            {{connection.status}} <a href="{% url namespace|add:'check_connection' %}?id={{connection.id}}">Check Status</a>
+        		            <a href="{% url namespace|add:'check_connection' %}?id={{connection.id}}">Check Status</a>
         		        {% endif %}
                         {% if connection.status == 'Active' %}
                           {% if connection.connection_type == 'Outbound' %}

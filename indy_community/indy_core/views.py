@@ -105,6 +105,31 @@ def handle_wallet_logout(request):
     return render(request, 'indy/form_response.html', {'msg': 'Logged out of wallet(s)'})
 
 
+def wallet_for_current_session(request):
+    """
+    Determine the current active wallet
+    """
+    wallet_name = request.session.wallet_name
+    wallet = IndyWallet.objects.filter(wallet_name=wallet_name).first()
+
+    # validate it is the correct wallet
+    wallet_type = request.session['wallet_type']
+    wallet_owner = request.session['wallet_owner']
+    if wallet_type == 'user':
+        # verify current user owns wallet
+        if wallet_owner == request.session.user.email:
+            return wallet
+        raise Exception('Error wallet/session config is not valid')
+    elif wallet_type == 'org':
+        # verify current user has relationship to org that owns wallet
+        for org in request.session.user.indyrelationship_set:
+            if org.org_name == wallet_owner:
+                return wallet
+        raise Exception('Error wallet/session config is not valid')
+    else:
+        raise Exception('Error wallet/session config is not valid')
+
+
 ###############################################################
 # UI views to support wallet and agent UI functions
 ###############################################################
@@ -147,9 +172,9 @@ def organization_credentials_view(request):
 ######################################################################
 def list_connections(request):
     # expects a wallet to be opened in the current session
-    wallet_name = request.session['wallet_name']
-    connections = AgentConnection.objects.filter(wallet__wallet_name=wallet_name).all()
-    return render(request, namespaced_template(request, 'connection/list.html'), {'wallet_name': wallet_name, 'connections': connections})
+    wallet = wallet_for_current_session(request)
+    connections = AgentConnection.objects.filter(wallet=wallet).all()
+    return render(request, namespaced_template(request, 'connection/list.html'), {'wallet_name': wallet.wallet_name, 'connections': connections})
 
 
 def handle_connection_request(request):
@@ -162,9 +187,7 @@ def handle_connection_request(request):
             partner_name = cd.get('partner_name')
 
             # get user or org associated with this wallet
-            wallet_name = request.session['wallet_name']
-            wallet = IndyWallet.objects.filter(wallet_name=wallet_name).first()
-            wallet_type = request.session['wallet_type']
+            wallet = wallet_for_current_session(request)
             wallet_owner = request.session['wallet_owner']
 
             # get user or org associated with target partner
@@ -197,15 +220,12 @@ def handle_connection_request(request):
                 return render(request, 'indy/form_response.html', {'msg': 'Updated connection for ' + wallet.wallet_name, 'msg_txt': my_connection.invitation, 'msg_txt2': my_connection.token })
             except IndyError:
                 # ignore errors for now
-                print(" >>> Failed to create request for", wallet_name)
-                return render(request, 'indy/form_response.html', {'msg': 'Failed to create request for ' + wallet_name})
+                print(" >>> Failed to create request for", wallet.wallet_name)
+                return render(request, 'indy/form_response.html', {'msg': 'Failed to create request for ' + wallet.wallet_name})
 
     else:
-        if 'wallet_name' in request.session:
-            wallet_name = request.session['wallet_name']
-        else:
-            wallet_name = ''
-        form = SendConnectionInvitationForm(initial={'wallet_name': wallet_name})
+        wallet = wallet_for_current_session(request)
+        form = SendConnectionInvitationForm(initial={'wallet_name': wallet.wallet_name})
 
         return render(request, 'indy/connection/request.html', {'form': form})
     
@@ -222,10 +242,7 @@ def handle_connection_response(request):
             invitation_details = cd.get('invitation_details')
 
             # get user or org associated with this wallet
-            wallet_name = request.session['wallet_name']
-            wallet = IndyWallet.objects.filter(wallet_name=wallet_name).first()
-            wallet_type = request.session['wallet_type']
-            wallet_owner = request.session['wallet_owner']
+            wallet = wallet_for_current_session(request)
 
             # set wallet password
             # TODO vcx_config['something'] = raw_password
@@ -234,29 +251,29 @@ def handle_connection_response(request):
             try:
                 my_connection = send_connection_confirmation(wallet, partner_name, invitation_details)
 
-                return render(request, 'indy/form_response.html', {'msg': 'Updated connection for ' + wallet_name})
+                return render(request, 'indy/form_response.html', {'msg': 'Updated connection for ' + wallet.wallet_name})
             except IndyError:
                 # ignore errors for now
-                print(" >>> Failed to update request for", wallet_name)
-                return render(request, 'indy/form_response.html', {'msg': 'Failed to update request for ' + wallet_name})
+                print(" >>> Failed to update request for", wallet.wallet_name)
+                return render(request, 'indy/form_response.html', {'msg': 'Failed to update request for ' + wallet.wallet_name})
 
     else:
         # find connection request
-        wallet_name = request.session['wallet_name']
+        wallet = wallet_for_current_session(request)
         connection_id = request.GET.get('id', None)
         connections = []
         if connection_id:
-            connections = AgentConnection.objects.filter(id=connection_id, wallet__wallet_name=wallet_name).all()
+            connections = AgentConnection.objects.filter(id=connection_id, wallet=wallet).all()
         if len(connections) > 0:
             form = SendConnectionResponseForm(initial={ 'connection_id': connection_id,
                                                         'wallet_name': connections[0].wallet.wallet_name, 
                                                         'partner_name': connections[0].partner_name, 
                                                         'invitation_details': connections[0].invitation })
         else:
-            wallet_name = request.session['wallet_name']
-            form = SendConnectionResponseForm(initial={'connection_id': 0, 'wallet_name': wallet_name})
+            wallet = wallet_for_current_session(request)
+            form = SendConnectionResponseForm(initial={'connection_id': 0, 'wallet_name': wallet.wallet_name})
 
-    return render(request, 'indy/connection/response.html', {'form': form})
+        return render(request, 'indy/connection/response.html', {'form': form})
     
 
 def poll_connection_status(request):
@@ -269,13 +286,12 @@ def poll_connection_status(request):
             connection_id = cd.get('connection_id')
 
             # log out of current wallet, if any
-            wallet_name = request.session['wallet_name']
-            wallet = IndyWallet.objects.filter(wallet_name=wallet_name).first()
+            wallet = wallet_for_current_session(request)
 
             # set wallet password
             # TODO vcx_config['something'] = raw_password
 
-            connections = AgentConnection.objects.filter(id=connection_id, wallet__wallet_name=wallet_name).all()
+            connections = AgentConnection.objects.filter(id=connection_id, wallet=wallet).all()
             # TODO validate connection id
             my_connection = connections[0]
 
@@ -283,22 +299,22 @@ def poll_connection_status(request):
             try:
                 my_connection = check_connection_status(wallet, my_connection)
 
-                return render(request, 'indy/form_response.html', {'msg': 'Updated connection for ' + wallet_name + ', ' + my_connection.partner_name})
+                return render(request, 'indy/form_response.html', {'msg': 'Updated connection for ' + wallet.wallet_name + ', ' + my_connection.partner_name})
             except IndyError:
                 # ignore errors for now
-                print(" >>> Failed to update request for", wallet_name)
-                return render(request, 'indy/form_response.html', {'msg': 'Failed to update request for ' + wallet_name})
+                print(" >>> Failed to update request for", wallet.wallet_name)
+                return render(request, 'indy/form_response.html', {'msg': 'Failed to update request for ' + wallet.wallet_name})
 
     else:
         # find connection request
-        wallet_name = request.session['wallet_name']
+        wallet = wallet_for_current_session(request)
         connection_id = request.GET.get('id', None)
-        connections = AgentConnection.objects.filter(id=connection_id, wallet__wallet_name=wallet_name).all()
+        connections = AgentConnection.objects.filter(id=connection_id, wallet=wallet).all()
 
         form = PollConnectionStatusForm(initial={ 'connection_id': connection_id,
                                                   'wallet_name': connections[0].wallet.wallet_name })
 
-    return render(request, 'indy/connection/status.html', {'form': form})
+        return render(request, 'indy/connection/status.html', {'form': form})
 
 
 ######################################################################
@@ -310,58 +326,47 @@ def check_connection_messages(request):
         if not form.is_valid():
             return render(request, 'indy/form_response.html', {'msg': 'Form error', 'msg_txt': str(form.errors)})
         else:
-            # log out of current wallet, if any
-            wallet_name = request.session['wallet_name']
-            raw_password = request.session['wallet_password']
-            indy_wallet_logout(None, request.user, request)
-    
             cd = form.cleaned_data
-
-            #now in the object cd, you have the form as a dictionary.
             connection_id = cd.get('connection_id')
 
+            # log out of current wallet, if any
+            wallet = wallet_for_current_session(request)
+    
             if connection_id > 0:
-                connections = VcxConnection.objects.filter(wallet_name=wallet_name, id=connection_id).all()
+                connections = AgentConnection.objects.filter(wallet=wallet, id=connection_id).all()
             else:
-                connections = VcxConnection.objects.filter(wallet_name=wallet_name).all()
+                connections = AgentConnection.objects.filter(wallet=wallet).all()
 
             total_count = 0
             for connection in connections:
                 # check for outstanding, un-received messages - add to outstanding conversations
                 if connection.connection_type == 'Inbound':
-                    wallet = connection.wallet_name
-                    msg_count = handle_inbound_messages(wallet, json.loads(wallet.vcx_config), connection)
+                    msg_count = handle_inbound_messages(wallet, connection)
                     total_count = total_count + msg_count
-
-            handle_wallet_login_internal(request, wallet_name, raw_password)
 
             return render(request, 'indy/form_response.html', {'msg': 'Received message count = ' + str(total_count)})
 
     else:
         # find connection request
         connection_id = request.GET.get('connection_id', None)
-        if 'wallet_name' in request.session:
-            wallet_name = request.session['wallet_name']
-            if connection_id:
-                connections = VcxConnection.objects.filter(wallet_name=wallet_name, id=connection_id).all()
-            else:
-                connection_id = 0
-                connections = VcxConnection.objects.filter(wallet_name=wallet_name).all()
+        wallet = wallet_for_current_session(request)
+        if connection_id:
+            connections = VcxConnection.objects.filter(wallet=wallet, id=connection_id).all()
+        else:
+            connection_id = 0
+            connections = VcxConnection.objects.filter(wallet=wallet).all()
         # TODO validate connection id
         form = PollConnectionStatusForm(initial={ 'connection_id': connection_id,
-                                                  'wallet_name': connections[0].wallet_name })
+                                                  'wallet_name': connections[0].wallet.wallet_name })
 
-    return render(request, 'indy/check_messages.html', {'form': form})
+        return render(request, 'indy/connection/check_messages.html', {'form': form})
 
 
 def list_conversations(request):
     # expects a wallet to be opened in the current session
-    if 'wallet_name' in request.session:
-        wallet_name = request.session['wallet_name']
-        conversations = VcxConversation.objects.filter(wallet_name=wallet_name).all()
-        return render(request, 'indy/list_conversations.html', {'wallet_name': wallet_name, 'conversations': conversations})
-
-    return render(request, 'indy/list_conversations.html', {'wallet_name': 'No wallet selected', 'conversations': []})
+    wallet = wallet_for_current_session(request)
+    conversations = AgentConversation.objects.filter(wallet=wallet).all()
+    return render(request, 'indy/list_conversations.html', {'wallet_name': wallet.wallet_name, 'conversations': conversations})
 
 
 def handle_select_credential_offer(request):
@@ -370,37 +375,33 @@ def handle_select_credential_offer(request):
         if not form.is_valid():
             return render(request, 'indy/form_response.html', {'msg': 'Form error', 'msg_txt': str(form.errors)})
         else:
-            # log out of current wallet, if any
-            wallet_name = request.session['wallet_name']
-            raw_password = request.session['wallet_password']
-            indy_wallet_logout(None, request.user, request)
-
             cd = form.cleaned_data
-
             connection_id = cd.get('connection_id')
             cred_def = cd.get('cred_def')
 
-            connections = VcxConnection.objects.filter(id=connection_id).all()
+            # log out of current wallet, if any
+            wallet = wallet_for_current_session(request)
+
+            connections = AgentConnection.objects.filter(id=connection_id, wallet=wallet).all()
             # TODO validate connection id
             schema_attrs = cred_def.creddef_template
             form = SendCredentialOfferForm(initial={ 'connection_id': connection_id,
-                                                     'wallet_name': connections[0].wallet_name,
+                                                     'wallet_name': connections[0].wallet.wallet_name,
                                                      'cred_def': cred_def.id,
                                                      'schema_attrs': schema_attrs })
 
-            handle_wallet_login_internal(request, wallet_name, raw_password)
-
-            return render(request, 'indy/credential_offer.html', {'form': form})
+            return render(request, 'indy/credential/offer.html', {'form': form})
 
     else:
         # find conversation request
         connection_id = request.GET.get('connection_id', None)
-        connections = VcxConnection.objects.filter(id=connection_id).all()
+        wallet = wallet_for_current_session(request)
+        connections = AgentConnection.objects.filter(id=connection_id, wallet=wallet).all()
         # TODO validate connection id
         form = SelectCredentialOfferForm(initial={ 'connection_id': connection_id,
-                                                   'wallet_name': connections[0].wallet_name})
+                                                   'wallet_name': connections[0].wallet.wallet_name})
 
-    return render(request, 'indy/select_credential_offer.html', {'form': form})
+        return render(request, 'indy/credential/select_offer.html', {'form': form})
 
 
 def handle_credential_offer(request):
@@ -409,40 +410,20 @@ def handle_credential_offer(request):
         if not form.is_valid():
             return render(request, 'indy/form_response.html', {'msg': 'Form error', 'msg_txt': str(form.errors)})
         else:
-            # log out of current wallet, if any
-            wallet_name = request.session['wallet_name']
-            raw_password = request.session['wallet_password']
-            indy_wallet_logout(None, request.user, request)
-    
             cd = form.cleaned_data
-
-            #now in the object cd, you have the form as a dictionary.
             connection_id = cd.get('connection_id')
             credential_tag = cd.get('credential_tag')
             cred_def_id = cd.get('cred_def')
             schema_attrs = cd.get('schema_attrs')
             credential_name = cd.get('credential_name')
 
-            # get user or org associated with this wallet
-            related_user = User.objects.filter(wallet_name=wallet_name).all()
-            related_org = AtriaOrganization.objects.filter(wallet_name=wallet_name).all()
-            if len(related_user) == 0 and len(related_org) == 0:
-                raise Exception('Error wallet with no owner {}'.format(wallet_name))
-            wallet = IndyWallet.objects.filter(wallet_name=wallet_name).first()
-
-            if 0 < len(related_user):
-                vcx_config = wallet.vcx_config
-                my_name = related_user[0].email
-            elif 0 < len(related_org):
-                vcx_config = wallet.vcx_config
-                my_name = related_org[0].org_name
-
-            connections = VcxConnection.objects.filter(id=connection_id).all()
+            wallet = wallet_for_current_session(request)
+    
+            connections = AgentConnection.objects.filter(id=connection_id, wallet=wallet).all()
             # TODO validate connection id
             my_connection = connections[0]
-            connection_data = my_connection.connection_data
 
-            cred_defs = IndyCredentialDefinition.objects.filter(id=cred_def_id).all()
+            cred_defs = IndyCredentialDefinition.objects.filter(id=cred_def_id, wallet=wallet).all()
             cred_def = cred_defs[0]
 
             # set wallet password
@@ -450,26 +431,13 @@ def handle_credential_offer(request):
 
             # build the credential offer and send
             try:
-                credential_data = send_credential_offer(wallet, json.loads(vcx_config), json.loads(connection_data), my_connection.partner_name, credential_tag, schema_attrs, cred_def, credential_name)
+                my_conversation = send_credential_offer(wallet, my_connection, credential_tag, schema_attrs, cred_def, credential_name)
 
-                my_conversation = VcxConversation(
-                    wallet_name = wallet,
-                    connection_partner_name = my_connection.partner_name,
-                    conversation_type = 'CredentialOffer',
-                    message_id = 'N/A',
-                    status = 'Sent',
-                    conversation_data = json.dumps(credential_data))
-                my_conversation.save()
-
-                print(" >>> Updated conversation for", wallet_name, )
-
-                handle_wallet_login_internal(request, wallet_name, raw_password)
-
-                return render(request, 'indy/form_response.html', {'msg': 'Updated conversation for ' + wallet_name})
+                return render(request, 'indy/form_response.html', {'msg': 'Updated conversation for ' + wallet.wallet_name})
             except IndyError:
                 # ignore errors for now
-                print(" >>> Failed to update conversation for", wallet_name)
-                return render(request, 'indy/form_response.html', {'msg': 'Failed to update conversation for ' + wallet_name})
+                print(" >>> Failed to update conversation for", wallet.wallet_name)
+                return render(request, 'indy/form_response.html', {'msg': 'Failed to update conversation for ' + wallet.wallet_name})
 
     else:
         return render(request, 'indy/form_response.html', {'msg': 'Method not allowed'})
@@ -481,70 +449,44 @@ def handle_cred_offer_response(request):
         if not form.is_valid():
             return render(request, 'indy/form_response.html', {'msg': 'Form error', 'msg_txt': str(form.errors)})
         else:
-            # log out of current wallet, if any
-            wallet_name = request.session['wallet_name']
-            raw_password = request.session['wallet_password']
-            indy_wallet_logout(None, request.user, request)
-    
             cd = form.cleaned_data
-
             conversation_id = cd.get('conversation_id')
 
-            # get user or org associated with this wallet
-            related_user = User.objects.filter(wallet_name=wallet_name).all()
-            related_org = AtriaOrganization.objects.filter(wallet_name=wallet_name).all()
-            if len(related_user) == 0 and len(related_org) == 0:
-                raise Exception('Error wallet with no owner {}'.format(wallet_name))
-            wallet = IndyWallet.objects.filter(wallet_name=wallet_name).first()
-
-            if 0 < len(related_user):
-                vcx_config = wallet.vcx_config
-                my_name = related_user[0].email
-            elif 0 < len(related_org):
-                vcx_config = wallet.vcx_config
-                my_name = related_org[0].org_name
-
+            # log out of current wallet, if any
+            wallet = wallet_for_current_session(request)
+    
             # find conversation request
-            conversations = VcxConversation.objects.filter(id=conversation_id).all()
+            conversations = AgentConversation.objects.filter(id=conversation_id, wallet=wallet).all()
             # TODO validate conversation id
             my_conversation = conversations[0]
-            indy_conversation = json.loads(my_conversation.conversation_data)
-            connections = VcxConnection.objects.filter(wallet_name=my_conversation.wallet_name, partner_name=my_conversation.connection_partner_name).all()
+            connections = AgentConnection.objects.filter(wallet=my_conversation.wallet, partner_name=my_conversation.connection_partner_name).all()
             # TODO validate connection id
             my_connection = connections[0]
 
             # build the credential request and send
             try:
-                credential_data = send_credential_request(wallet, json.loads(vcx_config), json.loads(my_connection.connection_data), my_connection.partner_name, my_conversation)
+                my_conversation = send_credential_request(wallet, my_connection, my_conversation)
 
-                my_conversation.status = 'Sent'
-                my_conversation.conversation_data = json.dumps(credential_data)
-                my_conversation.conversation_type = 'CredentialRequest'
-                my_conversation.save()
-
-                print(" >>> Updated conversation for", wallet_name, )
-
-                handle_wallet_login_internal(request, wallet_name, raw_password)
-
-                return render(request, 'indy/form_response.html', {'msg': 'Updated conversation for ' + wallet_name})
+                return render(request, 'indy/form_response.html', {'msg': 'Updated conversation for ' + wallet.wallet_name})
             except IndyError:
                 # ignore errors for now
-                print(" >>> Failed to update conversation for", wallet_name)
-                return render(request, 'indy/form_response.html', {'msg': 'Failed to update conversation for ' + wallet_name})
+                print(" >>> Failed to update conversation for", wallet.wallet_name)
+                return render(request, 'indy/form_response.html', {'msg': 'Failed to update conversation for ' + wallet.wallet_name})
 
     else:
         # find conversation request, fill in form details
         conversation_id = request.GET.get('conversation_id', None)
-        conversations = VcxConversation.objects.filter(id=conversation_id).all()
+        wallet = wallet_for_current_session(request)
+        conversations = AgentConversation.objects.filter(id=conversation_id, wallet=wallet).all()
         # TODO validate conversation id
         conversation = conversations[0]
         indy_conversation = json.loads(conversation.conversation_data)
-        connections = VcxConnection.objects.filter(wallet_name=conversation.wallet_name, partner_name=conversation.connection_partner_name).all()
+        connections = AgentConnection.objects.filter(wallet=conversation.wallet, partner_name=conversation.connection_partner_name).all()
         # TODO validate connection id
         connection = connections[0]
         form = SendCredentialResponseForm(initial={ 
                                                  'conversation_id': conversation_id,
-                                                 'wallet_name': connection.wallet_name,
+                                                 'wallet_name': connection.wallet.wallet_name,
                                                  'from_partner_name': connection.partner_name,
                                                  'claim_id':indy_conversation['claim_id'],
                                                  'claim_name': indy_conversation['claim_name'],
@@ -552,7 +494,7 @@ def handle_cred_offer_response(request):
                                                  'libindy_offer_schema_id': json.loads(indy_conversation['libindy_offer'])['schema_id']
                                                 })
 
-    return render(request, 'indy/cred_offer_response.html', {'form': form})
+        return render(request, 'indy/credential/offer_response.html', {'form': form})
 
 
 ######################################################################
