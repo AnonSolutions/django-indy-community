@@ -101,7 +101,7 @@ class SelectCredentialOfferForm(WalletNameForm):
         initial = kwargs.get('initial')
         if initial:
             wallet_name = initial.get('wallet_name')
-            self.fields['cred_def'].queryset = IndyCredentialDefinition.objects.filter(wallet_name__wallet_name=wallet_name).all()
+            self.fields['cred_def'].queryset = IndyCredentialDefinition.objects.filter(wallet__wallet_name=wallet_name).all()
 
 
 class SendCredentialOfferForm(WalletNameForm):
