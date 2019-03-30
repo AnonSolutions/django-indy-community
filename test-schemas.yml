@@ -8,7 +8,7 @@ Transcript:
     - last_name
     - degree
     - status
-    - year
+    - date
     - average
     - ssn
 Job Certificate:
@@ -21,7 +21,7 @@ Job Certificate:
     - last_name
     - ssn
     - salary
-    - employee_status'
+    - employee_status
     - experience
 Drivers License:
   type: schema
@@ -37,6 +37,7 @@ Drivers License:
     - issued_date
     - expire_date
     - birth_date
+    - age
     - height
     - weight
     - sex
@@ -59,6 +60,7 @@ Passport:
     - expire_date
     - nationality
     - birth_date
+    - age
     - issuing_country
     - issuing_authority
 Proof of Age:

@@ -101,7 +101,7 @@ class SelectCredentialOfferForm(WalletNameForm):
         initial = kwargs.get('initial')
         if initial:
             wallet_name = initial.get('wallet_name')
-            self.fields['cred_def'].queryset = IndyCredentialDefinition.objects.filter(wallet_name__wallet_name=wallet_name).all()
+            self.fields['cred_def'].queryset = IndyCredentialDefinition.objects.filter(wallet__wallet_name=wallet_name).all()
 
 
 class SendCredentialOfferForm(WalletNameForm):
@@ -180,17 +180,17 @@ class SelectProofReqClaimsForm(SendProofReqResponseForm):
         super(SelectProofReqClaimsForm, self).__init__(*args, **kwargs)
         initial = kwargs.get('initial')
         if initial:
-            field_attrs = json.loads(initial.get('requested_attrs', '{}'))
-            for attr in field_attrs[0]['attrs']:
-                field_name = 'proof_req_attr_' + attr
-                print(field_name)
-                choices = []
-                claim_no = 0
-                if 0 < len(field_attrs[0]['attrs'][attr]):
-                    for claim in field_attrs[0]['attrs'][attr]:
-                        choices.append((claim_no, json.dumps(claim)))
-                        claim_no = claim_no + 1
-                    self.fields[field_name] = forms.ChoiceField(label='Select claim for '+attr, choices=tuple(choices), widget=forms.RadioSelect())
-                else:
-                    self.fields[field_name] = forms.CharField(label='No claims available for '+attr+', enter value:', max_length=80)
+            field_attrs = initial.get('requested_attrs', '{}')
+            if 'attrs' in field_attrs:
+                for attr in field_attrs['attrs']:
+                    field_name = 'proof_req_attr_' + attr
+                    choices = []
+                    claim_no = 0
+                    if 0 < len(field_attrs['attrs'][attr]):
+                        for claim in field_attrs['attrs'][attr]:
+                            choices.append(('ref::'+claim['cred_info']['referent'], json.dumps(claim['cred_info']['attrs'])))
+                            claim_no = claim_no + 1
+                        self.fields[field_name] = forms.ChoiceField(label='Select claim for '+attr, choices=tuple(choices), widget=forms.RadioSelect())
+                    else:
+                        self.fields[field_name] = forms.CharField(label='No claims available for '+attr+', enter value:', max_length=80)
 
