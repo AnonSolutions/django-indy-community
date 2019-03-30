@@ -316,7 +316,7 @@ class AgentInteractionTests(TestCase):
             # build array of credential id's (from wallet)
             claims = claim_data['attrs'][attr]
             if 0 < len(claims):
-                credential_attrs[attr] = {'schema_id': claims[0]['cred_info']['schema_id']}
+                credential_attrs[attr] = {'referent': claims[0]['cred_info']['referent']}
             else:
                 # if no claim available, make up a self-attested value
                 credential_attrs[attr] = {'value': 'user-supplied value'}

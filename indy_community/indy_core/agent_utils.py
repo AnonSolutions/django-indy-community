@@ -515,9 +515,9 @@ def get_claims_for_proof_request(wallet, connection, my_conversation):
     return creds_for_proof
 
 
-def cred_for_schema_id(creds_for_proof, attr, schema_id):
+def cred_for_referent(creds_for_proof, attr, schema_id):
     for cred in creds_for_proof['attrs'][attr]:
-        if schema_id == cred['cred_info']['schema_id']:
+        if schema_id == cred['cred_info']['referent']:
             return cred
     return None
 
@@ -540,9 +540,10 @@ def send_claims_for_proof_request(wallet, connection, my_conversation, credentia
         self_attested = {}
         for attr in creds_for_proof['attrs']:
             selected = credential_attrs[attr]
-            if 'schema_id' in selected:
+            print(attr, selected)
+            if 'referent' in selected:
                 creds_for_proof['attrs'][attr] = {
-                    'credential': cred_for_schema_id(creds_for_proof, attr, selected['schema_id'])
+                    'credential': cred_for_referent(creds_for_proof, attr, selected['referent'])
                 }
             else:
                 self_attested[attr] = selected['value']
@@ -556,6 +557,11 @@ def send_claims_for_proof_request(wallet, connection, my_conversation, credentia
 
         # serialize/deserialize proof 
         proof_data = run_coroutine(proof.serialize)
+
+        my_conversation.status = 'Accepted'
+        my_conversation.conversation_type = 'ProofOffer'
+        my_conversation.conversation_data = json.dumps(proof_data)
+        my_conversation.save()
 
     except:
         raise
