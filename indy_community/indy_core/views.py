@@ -142,11 +142,11 @@ def individual_wallet_view(request):
 #def individual_connections_view(request):
 #    return render(request, 'indy/individual_connections.html')
 
-def individual_conversations_view(request):
-    return render(request, 'indy/individual_conversations.html')
+#def individual_conversations_view(request):
+#    return render(request, 'indy/individual_conversations.html')
 
-def individual_credentials_view(request):
-    return render(request, 'indy/individual_credentials.html')
+#def individual_credentials_view(request):
+#    return render(request, 'indy/individual_credentials.html')
 
 def organization_profile_view(request):
     return render(request, 'indy/organization_profile.html')
@@ -163,8 +163,8 @@ def organization_wallet_view(request):
 #def organization_conversations_view(request):
 #    return render(request, 'indy/organization_conversations.html')
 
-def organization_credentials_view(request):
-    return render(request, 'indy/organization_credentials.html')
+#def organization_credentials_view(request):
+#    return render(request, 'indy/organization_credentials.html')
 
 
 ######################################################################
@@ -832,16 +832,20 @@ def form_response(request):
 
 
 def list_wallet_credentials(request):
-    if 'wallet_name' in request.session:
-        wallet_name = request.session['wallet_name']
-        wallet_handle = request.session['wallet_handle']
+    wallet_handle = None
+    try:
+        wallet = wallet_for_current_session(request)
+        raw_password = request.session['wallet_password']
+        wallet_handle = open_wallet(wallet.wallet_name, raw_password)
 
         (search_handle, search_count) = run_coroutine_with_args(prover_search_credentials, wallet_handle, "{}")
         credentials = run_coroutine_with_args(prover_fetch_credentials, search_handle, search_count)
         run_coroutine_with_args(prover_close_credentials_search, search_handle)
 
-        return render(request, 'indy/list_credentials.html', {'wallet_name': wallet_name, 'credentials': json.loads(credentials)})
-
-    return render(request, 'indy/list_credentials.html', {'wallet_name': 'No wallet selected', 'credentials': []})
-
+        return render(request, namespaced_template(request, 'credential/list.html'), {'wallet_name': wallet.wallet_name, 'credentials': json.loads(credentials)})
+    except:
+        raise
+    finally:
+        if wallet_handle:
+            close_wallet(wallet_handle)
 

@@ -98,7 +98,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'indy_community.urls'
 
-SESSION_COOKIE_AGE = 1800
+#SESSION_COOKIE_AGE = 1800
 
 TEMPLATES = [
     {

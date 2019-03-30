@@ -44,7 +44,7 @@ individualpatterns = [
         path('wallet/', individual_wallet_view, name='wallet'),
         path('connections/', list_connections, name='connections'),
         path('conversations/', list_conversations, name='conversations'),
-        path('credentials/', individual_credentials_view, name='credentials'),
+        path('credentials/', list_wallet_credentials, name='credentials'),
         ])),
     path('', include(sharedpatterns)),
 ]
@@ -57,7 +57,7 @@ organizationpatterns = [
         path('wallet/', organization_wallet_view, name='wallet'),
         path('connections/', list_connections, name='connections'),
         path('conversations/', list_conversations, name='conversations'),
-        path('credentials/', organization_credentials_view, name='credentials'),
+        path('credentials/', list_wallet_credentials, name='credentials'),
         ])),
     path('', include(sharedpatterns)),
 ]
