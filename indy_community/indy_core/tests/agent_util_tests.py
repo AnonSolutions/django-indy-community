@@ -136,6 +136,68 @@ class AgentInteractionTests(TestCase):
             sleep(2)
         org_conversation_3 = message
 
+    def issue_credential_from_org_to_user_bg_tasks(self, org, user, org_connection, user_connection, cred_def, schema_attrs, cred_name, cred_tag):
+        # issue a credential based on the default schema/credential definition
+        org_conversation_1 = send_credential_offer(org.wallet, org_connection,  
+                                            cred_tag, schema_attrs, cred_def, 
+                                            cred_name)
+        sleep(2)
+
+        i = 0
+        while True:
+            handled_count = handle_inbound_messages(user.wallet, user_connection)
+            i = i + 1
+            if handled_count > 0 or i > 3:
+                break
+            sleep(2)
+        user_conversations = AgentConversation.objects.filter(wallet=user.wallet, conversation_type="CredentialOffer", status='Pending').all()
+        user_conversation_1 = user_conversations[0]
+
+        # send credential request (user -> org)
+        user_conversation_2 = send_credential_request(user.wallet, user_connection, user_conversation_1)
+        sleep(2)
+
+        # send credential (org -> user)
+        i = 0
+        message = org_conversation_1
+        while True:
+            poll_count = poll_message_conversations(org.wallet, org_connection)
+            i = i + 1
+            if poll_count == 1 or i > 3:
+                break
+            sleep(2)
+        org_conversation_2 = AgentConversation.objects.filter(wallet=org.wallet, id=message.id).all()[0]
+        if org_conversation_2.conversation_type != 'IssueCredential':
+            raise Exception("Expected IssueCredential but got " + org_conversation_2.conversation_type)
+        sleep(2)
+
+        # accept credential and update status (user)
+        i = 0
+        message = user_conversation_2
+        while True:
+            poll_count = poll_message_conversations(user.wallet, user_connection)
+            i = i + 1
+            if poll_count == 1 or i > 3:
+                break
+            sleep(2)
+        user_conversation_3 = AgentConversation.objects.filter(wallet=user.wallet, id=message.id).all()[0]
+        if user_conversation_3.status != 'Accepted':
+            raise Exception('Expected Accepted but got' + user_conversation_3.status)
+        sleep(2)
+
+        # update credential offer status (org)
+        i = 0
+        message = org_conversation_2
+        while True:
+            poll_count = poll_message_conversations(org.wallet, org_connection)
+            i = i + 1
+            if poll_count == 1 or i > 3:
+                break
+            sleep(2)
+        org_conversation_3 = AgentConversation.objects.filter(wallet=org.wallet, id=message.id).all()[0]
+        if org_conversation_3.status != 'Accepted':
+            raise Exception('Expected Accepted but got' + org_conversation_3.status)
+
 
     def test_register_org_with_schema_and_cred_def(self):
         # try creating a schema and credential definition under the organization
@@ -243,6 +305,34 @@ class AgentInteractionTests(TestCase):
             sleep(2)
         self.assertEqual(message.status, 'Accepted')
         org_conversation_3 = message
+
+        # verify credential is in user wallet
+        user_credentials = list_wallet_credentials(user.wallet)
+        self.assertEqual(len(user_credentials), 1)
+
+        # clean up after ourself
+        self.delete_user_and_org_wallets(user, org, raw_password)
+
+
+    def test_agent_credential_exchange_bgtask(self):
+        # request and deliver a proof between two agents
+        (user, org, raw_password) = self.create_user_and_org()
+        (schema, cred_def, proof_request) = self.schema_and_cred_def_for_org(org)
+
+        # establish a connection
+        (org_connection, user_connection) = self.establish_agent_connection(org, user)
+
+        # make up a credential
+        schema_attrs = json.loads(cred_def.creddef_template)
+        schema_attrs['name'] = 'Joe Smith'
+        schema_attrs['date'] = '2018-01-01'
+        schema_attrs['degree'] = 'B.A.Sc. Honours'
+        schema_attrs['age'] = '25'
+        cred_name = 'Cred4Proof Credential Name'
+        cred_tag = 'Cred4Proof Tag Value'
+
+        # issue credential (org -> user)
+        self.issue_credential_from_org_to_user_bg_tasks(org, user, org_connection, user_connection, cred_def, schema_attrs, cred_name, cred_tag)
 
         # verify credential is in user wallet
         user_credentials = list_wallet_credentials(user.wallet)

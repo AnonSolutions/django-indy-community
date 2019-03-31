@@ -12,10 +12,11 @@
 		<div>
 			<h5>
 				<a href="{% url namespace|add:'send_invitation' %}">{% trans "Send Connection Invite" %}</a>
-			</h5>
-			<h5>
-				<a href="{% url namespace|add:'connection_response' %}?id=0">{% trans "Respond to (External) Connection Invite" %}</a>
-			</h5>
+                or:
+				<a href="{% url namespace|add:'connection_response' %}?id=0">{% trans "Respond to (External) Invite" %}</a>
+                or: 
+                <a href="{% url namespace|add:'check_messages' %}">Poll for Messages on All Connections</a>
+            </h5>
 		</div>
 	</div>
     <div class='newsfeed-post-seperator'></div>
@@ -49,10 +50,8 @@
                             or 
                           {% endif %}
                           <a href="{% url namespace|add:'select_proof_request' %}?connection_id={{connection.id}}">Send Proof Request</a>
-                          {% if connection.connection_type == 'Inbound' %}
                             or
                             <a href="{% url namespace|add:'check_messages' %}?connection_id={{connection.id}}">Poll for Messages</a>
-                          {% endif %}
                         {% endif %}
         			</h5>
         		</div>
