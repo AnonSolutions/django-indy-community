@@ -333,11 +333,11 @@ def check_connection_status(wallet, connection):
         connection_to_.release()
         connection_to_ = None
 
-        connections = AgentConnection.objects.filter(wallet=wallet, partner_name=connection.partner_name).all()
-        connection = connections[0]
-        connection.connection_data = json.dumps(connection_data)
-        connection.status = return_state
-        connection.save()
+        connections = AgentConnection.objects.filter(wallet=wallet, status='Sent', partner_name=connection.partner_name).all()
+        my_connection = connections[0]
+        my_connection.connection_data = json.dumps(connection_data)
+        my_connection.status = return_state
+        my_connection.save()
     except:
         raise
     finally:
@@ -348,7 +348,7 @@ def check_connection_status(wallet, connection):
             raise
 
     print(" >>> Done!!!")
-    return connection
+    return my_connection
 
 
 ######################################################################
@@ -594,7 +594,7 @@ def handle_inbound_messages(my_wallet, my_connection):
         connection_to_ = run_coroutine_with_args(Connection.deserialize, connection_data)
 
         if my_connection.connection_type == 'Inbound':
-            print("Check for and receive offers")
+            print(" >>> Check for and receive offers")
             offers = run_coroutine_with_args(Credential.get_offers, connection_to_)
             for offer in offers:
                 already_handled = AgentConversation.objects.filter(message_id=offer[0]['msg_ref_id']).all()
@@ -609,11 +609,11 @@ def handle_inbound_messages(my_wallet, my_connection):
                                         status = 'Pending',
                                         conversation_data = offer_data
                                     )
-                    print("Saving received offer to DB")
+                    print(" >>> Saving received offer to DB")
                     new_offer.save()
                     handled_count = handled_count + 1
 
-        print("Check for and handle proof requests")
+        print(" >>> Check for and handle proof requests")
         requests = run_coroutine_with_args(DisclosedProof.get_requests, connection_to_)
         for request in requests:
             already_handled = AgentConversation.objects.filter(message_id=request['msg_ref_id']).all()
@@ -628,7 +628,7 @@ def handle_inbound_messages(my_wallet, my_connection):
                                     status = 'Pending',
                                     conversation_data = request_data
                                 )
-                print("Saving received proof request to DB")
+                print(" >>> Saving received proof request to DB")
                 new_request.save()
                 handled_count = handled_count + 1
     except:
@@ -679,8 +679,7 @@ def poll_message_conversation(my_wallet, my_connection, message, initialize_vcx=
             elif credential_state == State.Accepted:
                 message.status = 'Accepted'
 
-            # serialize/deserialize credential - wait for Faber to send credential
-            print("Saving message with a status of ", message.message_id, message.conversation_type, message.status)
+            print("Saving message with a status of", message.message_id, message.conversation_type, message.status)
             credential_data = run_coroutine(credential.serialize)
             message.conversation_data = json.dumps(credential_data)
             message.save()
@@ -777,11 +776,11 @@ def poll_message_conversations(my_wallet, my_connection):
         polled_count = 0
 
         # Any conversations of status 'Sent' are for bot processing ...
-        messages = AgentConversation.objects.filter(wallet_name=my_wallet, connection_partner_name=my_connection.partner_name, status='Sent')
+        messages = AgentConversation.objects.filter(wallet=my_wallet, connection_partner_name=my_connection.partner_name, status='Sent')
 
         for message in messages:
-            count = poll_message_conversation(my_wallet, config, my_connection, message, initialize_vcx=False)
-            polled_count = polled_count + count
+            message = poll_message_conversation(my_wallet, my_connection, message, initialize_vcx=False)
+            polled_count = polled_count + 1
             pass
     except:
         raise
@@ -792,7 +791,7 @@ def poll_message_conversations(my_wallet, my_connection):
         except:
             raise
 
-    print(" >>> Done!!!")
+    print(" >>> Done!!!", polled_count)
 
     return polled_count
 

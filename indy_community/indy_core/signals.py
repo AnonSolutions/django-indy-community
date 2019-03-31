@@ -33,19 +33,18 @@ def user_wallet_logged_out_handler(request, user):
     session.wallet_name = None
     session.save()
 
-def user_logged_in_handler(sender, request, user, **kwargs):
+def user_logged_in_handler(sender, user, request, **kwargs):
     if 'wallet_name' in request.session:
         wallet_name = request.session['wallet_name']
     else:
         wallet_name = None
     print("Login user {} {} {}".format(user.email, request.session.session_key, wallet_name))
     (session, session_created) = IndySession.objects.get_or_create(user=user, session_id=request.session.session_key, wallet_name=wallet_name)
-    agent_background_task("Started by user login", user.id, request.session.session_key, repeat=20)
+    agent_background_task("Started by user login", user.id, request.session.session_key, repeat=AGENT_POLL_INTERVAL)
 
 
 def user_logged_out_handler(sender, user, request, **kwargs):
     print("Logout user {} {}".format(user.email, request.session.session_key))
-    indy_wallet_logout(sender, user, request, **kwargs)
     IndySession.objects.get(user=user, session_id=request.session.session_key).delete()
 
 
@@ -115,9 +114,13 @@ def init_user_session(sender, user, request, **kwargs):
     namespace = url_namespace(role)
     request.session['URL_NAMESPACE'] = namespace
 
+    # setup background "virtual agent"
+    user_logged_in_handler(sender, user, request, **kwargs)
+
 
 def clear_user_session(sender, user, request, **kwargs):
-    handle_wallet_logout_internal(request)
+    # setup background "virtual agent"
+    user_logged_out_handler(sender, user, request, **kwargs)
 
     if 'ACTIVE_ROLE' in request.session:
         del request.session['ACTIVE_ROLE']

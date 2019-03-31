@@ -1,16 +1,22 @@
 import json
 import datetime
-from background_task import background
+import pytz
+
+from django.utils import timezone
 from django.contrib.sessions.models import Session
 from django.contrib.auth import get_user_model
+
+from background_task import background
 
 from indy.error import ErrorCode, IndyError
 
 from .models import IndySession, IndyWallet, AgentConnection, AgentConversation
 from .agent_utils import check_connection_status, handle_inbound_messages, poll_message_conversations
 
+AGENT_POLL_INTERVAL = 20
 
-@background(schedule=5)
+
+@background(schedule=AGENT_POLL_INTERVAL)
 def agent_background_task(message, user_id, session_key, org_id=None):
     # check if user/wallet has a valid session
     user = get_user_model().objects.filter(id=user_id).first()
@@ -20,7 +26,7 @@ def agent_background_task(message, user_id, session_key, org_id=None):
         raise Exception("No Indy Session found for {} {}".format(user.email, session_key))
 
     print("Found session {}  for user {} wallet {}".format(session.id, user.email, session.wallet_name))
-    if session.session.expire_date < datetime.datetime.now():
+    if session.session.expire_date < timezone.get_current_timezone().localize(datetime.datetime.now()):
         raise Exception("Django Session timed out for {} {}".format(user.email, session.wallet_name))
 
     if session.wallet_name is not None:
@@ -34,13 +40,10 @@ def agent_background_task(message, user_id, session_key, org_id=None):
         for connection in connections:
             # validate connection and get the updated status
             try:
-                (connection_data, new_status) = check_connection_status(json.loads(wallet.vcx_config), json.loads(connection.connection_data))
+                print(" >>> Checking connection", session.wallet_name, connection.partner_name)
+                upd_connection = check_connection_status(wallet, connection)
 
-                connection.connection_data = json.dumps(connection_data)
-                connection.status = new_status
-                connection.save()
-
-                print(" >>> Updated connection for", session.wallet_name, connection.id, connection.partner_name)
+                print(" >>> Updated connection for", session.wallet_name, upd_connection.id, upd_connection.partner_name, upd_connection.status)
             except IndyError as e:
                 print(" >>> Failed to update connection request for", session.wallet_name, connection.id, connection.partner_name)
                 raise e
@@ -49,9 +52,21 @@ def agent_background_task(message, user_id, session_key, org_id=None):
         connections = AgentConnection.objects.filter(wallet=wallet, status='Active').all()
         for connection in connections:
             # check for outstanding, un-received messages - add to outstanding conversations
-            #if connection.connection_type == 'Inbound':
-            msg_count = handle_inbound_messages(wallet, connection)
+            try:
+                print(" >>> Checking for inbound messages", session.wallet_name, connection.id, connection.partner_name)
+                #if connection.connection_type == 'Inbound':
+                msg_count = handle_inbound_messages(wallet, connection)
+                print(" >>> Handled inbound messages", str(msg_count), session.wallet_name, connection.id, connection.partner_name)
+            except IndyError as e:
+                print(" >>> Failed to handle inbound messages for", session.wallet_name, connection.id, connection.partner_name)
+                raise e
 
-            # TODO check status of any in-flight conversations (send/receive credential or request/provide proof)
-            polled_count = poll_message_conversations(wallet, connection)
+            # check status of any in-flight conversations (send/receive credential or request/provide proof)
+            try:
+                print(" >>> Checking updated conversations", session.wallet_name, connection.id, connection.partner_name)
+                polled_count = poll_message_conversations(wallet, connection)
+                print(" >>> Handled conversations", str(polled_count), session.wallet_name, connection.id, connection.partner_name)
+            except IndyError as e:
+                print(" >>> Failed to poll conversations for", session.wallet_name, connection.id, connection.partner_name)
+                raise e
 
