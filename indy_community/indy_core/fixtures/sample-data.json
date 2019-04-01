@@ -1,21 +1,5 @@
 [
 {
-    "model": "auth.group",
-    "pk": 1,
-    "fields": {
-        "name": "Admin",
-        "permissions": []
-    }
-},
-{
-    "model": "auth.group",
-    "pk": 2,
-    "fields": {
-        "name": "User",
-        "permissions": []
-    }
-},
-{
     "model": "indy_core.indyuser",
     "pk": 1,
     "fields": {

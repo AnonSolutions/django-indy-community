@@ -9,6 +9,11 @@ from django.utils import timezone
 from datetime import datetime, date, timedelta
 
 
+USER_ROLES = (
+    'Admin',
+    'User',
+)
+
 # base class for Indy wallets
 class IndyWallet(models.Model):
     wallet_name = models.CharField(max_length=30, unique=True)

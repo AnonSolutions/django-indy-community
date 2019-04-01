@@ -48,7 +48,7 @@ def user_logged_out_handler(sender, user, request, **kwargs):
     IndySession.objects.get(user=user, session_id=request.session.session_key).delete()
 
 
-def handle_wallet_login_internal(request, wallet_name, raw_password):
+def handle_wallet_login_internal(request, user, wallet_name, raw_password):
     # get user or org associated with this wallet
     related_user = get_user_model().objects.filter(wallet__wallet_name=wallet_name).all()
     related_org = IndyOrganization.objects.filter(wallet__wallet_name=wallet_name).all()
@@ -68,7 +68,7 @@ def handle_wallet_login_internal(request, wallet_name, raw_password):
     request.session['wallet_name'] = wallet_name
     request.session['wallet_password'] = raw_password
 
-    user_wallet_logged_in_handler(request, request.user, wallet_name)
+    user_wallet_logged_in_handler(request, user, wallet_name)
 
 
 def handle_wallet_logout_internal(request):
@@ -96,7 +96,7 @@ def init_user_session(sender, user, request, **kwargs):
             if sel_org.wallet is not None:
                 sel_wallet = sel_org.wallet
                 config = json.loads(sel_wallet.wallet_config)
-                handle_wallet_login_internal(request, config['wallet_name'], config['wallet_key'])
+                handle_wallet_login_internal(request, user, config['wallet_name'], config['wallet_key'])
     else:
         if user.has_role('User'):
             request.session['ACTIVE_ROLE'] = 'User'
@@ -108,7 +108,7 @@ def init_user_session(sender, user, request, **kwargs):
         if user.wallet is not None:
             sel_wallet = user.wallet
             config = json.loads(sel_wallet.wallet_config)
-            handle_wallet_login_internal(request, config['wallet_name'], config['wallet_key'])
+            handle_wallet_login_internal(request, user, config['wallet_name'], config['wallet_key'])
 
     role = request.session['ACTIVE_ROLE']
     namespace = url_namespace(role)
