@@ -1,19 +1,19 @@
 
-Molecular You Inc:
+Molecular $random Inc:
   first_name: Molecular
   last_name: You
-  email: myco@mail.com
+  email: myco-$random@mail.com
   password: pass12345
   role: MYco
-UBC Ethics Review Board:
+UBC Ethics $random Board:
   first_name: UBC
   last_name: Ethics
-  email: irb@mail.com
+  email: irb-$random@mail.com
   password: pass12345
   role: IRB
-Joe Research Co:
+$random Research Co:
   first_name: Joe
   last_name: Research
-  email: joe@mail.com
+  email: joe-$random@mail.com
   password: pass12345
   role: Researcher

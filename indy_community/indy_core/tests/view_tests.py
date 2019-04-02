@@ -147,6 +147,22 @@ class IndyViewsTests(TestCase):
         cred_defs = IndyCredentialDefinition.objects.all()
         self.assertEqual(4, len(cred_defs))
 
+        # TODO fetch the org for each role
+
+        # TODO register a user Alice
+
+        # TODO issue credentials from MYco to Alice
+
+        # TODO issue credential from IRB to Researcher
+
+        # TODO proofs between Alice and Researcher
+
+        # TODO issue consent from Researcher to Alice
+
+        # TODO provide proof and data from Alice to Researcher
+
+        # TODO cleanup - delete all wallets
+        
         self.login_org_user(ORG_USER, self.PASSWORD)
         self.cleanup_user_and_org(fetch_users[0], fetch_orgs[0], self.PASSWORD)
 

@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 import yaml
 import os
 
+from indy_core.utils import *
 from indy_core.models import *
 from indy_core.agent_utils import *
 from indy_core.registration_utils import *
@@ -42,6 +43,11 @@ class Command(BaseCommand):
                 email = org['email']
                 password = org['password']
                 role_name = org['role']
+
+                if "$random" in name:
+                    name = name.replace("$random", random_alpha_string(12))
+                if "$random" in email:
+                    email = email.replace("$random", random_alpha_string(12))
 
                 user = get_user_model().objects.create_user(first_name=first_name, last_name=last_name, email=email, password=password)
                 user.groups.add(Group.objects.get(name='User'))
