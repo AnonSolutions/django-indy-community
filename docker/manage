@@ -29,6 +29,8 @@ usage() {
             
       start - Same as up
 
+      django - run python manage.py commands, such as loads_schemas and loads_orgs, and shell
+
       logs - Display the logs from the docker compose run (ctrl-c to exit).
 
       stop - Stops the services.  This is a non-destructive process.  The volumes and containers
@@ -190,7 +192,7 @@ shell)
 django)
   _startupParams=$(getStartupParams $@)
   configureEnvironment $@
-  docker-compose run indy-django python manage.py $@
+  docker-compose run -w /home/indy/indy_community/indy_community indy-django python manage.py $@
   ;;
 *)
   usage

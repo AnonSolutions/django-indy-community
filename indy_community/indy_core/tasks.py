@@ -13,7 +13,7 @@ from indy.error import ErrorCode, IndyError
 from .models import IndySession, IndyWallet, AgentConnection, AgentConversation
 from .agent_utils import check_connection_status, handle_inbound_messages, poll_message_conversations
 
-AGENT_POLL_INTERVAL = 20
+AGENT_POLL_INTERVAL = 5
 
 
 @background(schedule=AGENT_POLL_INTERVAL)

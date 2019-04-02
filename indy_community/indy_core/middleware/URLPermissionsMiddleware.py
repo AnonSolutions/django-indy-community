@@ -13,7 +13,7 @@ class URLPermissionsMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        if not self.applicable_path(request.path) or\
+        if not self.applicable_path(request.path) or \
                 self.request_allowed(request):
             return self.get_response(request)
         else:

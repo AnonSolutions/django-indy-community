@@ -50,7 +50,7 @@ class Command(BaseCommand):
                     email = email.replace("$random", random_alpha_string(12))
 
                 user = get_user_model().objects.create_user(first_name=first_name, last_name=last_name, email=email, password=password)
-                user.groups.add(Group.objects.get(name='User'))
+                user.groups.add(Group.objects.get(name='Admin'))
                 user.save()
 
                 org_role, created = IndyOrgRole.objects.get_or_create(name=role_name)
