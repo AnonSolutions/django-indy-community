@@ -4,7 +4,7 @@ services:
   # indy-django
   # 
   indy-django:
-    image: anon:indy-base
+    image: anon/indy-base
     networks:
       - anon
       - von
@@ -23,6 +23,8 @@ services:
         touch db.sqlite3;
         DJANGO_SETTINGS_MODULE=indy_community.docker_settings ./reload_db.sh;
         sleep 5;
+        DJANGO_SETTINGS_MODULE=indy_community.docker_settings ./init_data.sh;
+        sleep 5;
         DJANGO_SETTINGS_MODULE=indy_community.docker_settings python manage.py runserver 0.0.0.0:8000 & disown;
         sleep 5;
         DJANGO_SETTINGS_MODULE=indy_community.docker_settings python manage.py process_tasks;"
@@ -31,7 +33,7 @@ services:
   # dummy-cloud-agent
   #
   dummy-cloud-agent:
-    image: anon:indy-base
+    image: anon/indy-base
     networks:
       - anon
       - von

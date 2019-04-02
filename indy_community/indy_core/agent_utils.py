@@ -82,20 +82,17 @@ def initialize_and_provision_vcx(wallet_name, raw_password, institution_name, di
     config['genesis_path'] = settings.INDY_CONFIG['vcx_genesis_path']
     config['pool_name'] = 'pool_' + wallet_name
 
-    print(" >>> Initialize libvcx with new configuration for", institution_name)
     try:
         config_json = json.dumps(config)
         run_coroutine_with_args(vcx_init_with_config, config_json)
     except:
         raise
     finally:
-        print(" >>> Shutdown vcx (for now)")
         try:
             shutdown(False)
         except:
             raise
 
-    print(" >>> Done!!!")
     return json.dumps(config)
 
 
@@ -650,7 +647,6 @@ def handle_inbound_messages(my_wallet, my_connection):
 
 def poll_message_conversation(my_wallet, my_connection, message, initialize_vcx=True):
     if initialize_vcx:
-        print(" >>> Initialize libvcx with configuration")
         try:
             config_json = my_wallet.wallet_config
             run_coroutine_with_args(vcx_init_with_config, config_json)
@@ -670,16 +666,13 @@ def poll_message_conversation(my_wallet, my_connection, message, initialize_vcx=
 
             run_coroutine(credential.update_state)
             credential_state = run_coroutine(credential.get_state)
-            print("Updated status = ", credential_state)
 
             if credential_state == State.RequestReceived:
-                print("Sending credential")
                 run_coroutine_with_args(credential.send_credential, connection)
                 message.conversation_type = 'IssueCredential'
             elif credential_state == State.Accepted:
                 message.status = 'Accepted'
 
-            print("Saving message with a status of", message.message_id, message.conversation_type, message.status)
             credential_data = run_coroutine(credential.serialize)
             message.conversation_data = json.dumps(credential_data)
             message.save()
@@ -691,12 +684,10 @@ def poll_message_conversation(my_wallet, my_connection, message, initialize_vcx=
 
             run_coroutine(credential.update_state)
             credential_state = run_coroutine(credential.get_state)
-            print("Updated status = ", credential_state)
 
             if credential_state == State.Accepted:
                 message.status = 'Accepted'
 
-            print("Saving message with a status of ", message.message_id, message.conversation_type, message.status)
             credential_data = run_coroutine(credential.serialize)
             message.conversation_data = json.dumps(credential_data)
             message.save()
@@ -708,13 +699,11 @@ def poll_message_conversation(my_wallet, my_connection, message, initialize_vcx=
 
             run_coroutine(credential.update_state)
             credential_state = run_coroutine(credential.get_state)
-            print("Updated status = ", credential_state)
 
             if credential_state == State.Accepted:
                 message.status = 'Accepted'
 
             # serialize/deserialize credential - wait for Faber to send credential
-            print("Saving message with a status of ", message.message_id, message.conversation_type, message.status)
             credential_data = run_coroutine(credential.serialize)
             message.conversation_data = json.dumps(credential_data)
             message.save()
@@ -726,17 +715,14 @@ def poll_message_conversation(my_wallet, my_connection, message, initialize_vcx=
 
             run_coroutine(proof.update_state)
             proof_state = run_coroutine(proof.get_state)
-            print("Updated status = ", proof_state)
 
             if proof_state == State.Accepted:
                 message.status = 'Accepted'
                 run_coroutine_with_args(proof.get_proof, connection)
 
                 if proof.proof_state == ProofState.Verified:
-                    print("proof is verified!!")
                     message.proof_state = 'Verified'
                 else:
-                    print("could not verify proof :(")
                     message.proof_state = 'Not Verified'
 
             # serialize/deserialize credential - wait for Faber to send credential
@@ -753,19 +739,15 @@ def poll_message_conversation(my_wallet, my_connection, message, initialize_vcx=
         raise
     finally:
         if initialize_vcx:
-            print(" >>> Shutdown vcx (for now)")
             try:
                 shutdown(False)
             except:
                 raise
 
-    print(" >>> Done!!!")
-
     return message
 
 
 def poll_message_conversations(my_wallet, my_connection):
-    print(" >>> Initialize libvcx with configuration")
     try:
         config_json = my_wallet.wallet_config
         run_coroutine_with_args(vcx_init_with_config, config_json)
@@ -785,13 +767,10 @@ def poll_message_conversations(my_wallet, my_connection):
     except:
         raise
     finally:
-        print(" >>> Shutdown vcx (for now)")
         try:
             shutdown(False)
         except:
             raise
-
-    print(" >>> Done!!!", polled_count)
 
     return polled_count
 

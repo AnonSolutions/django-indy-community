@@ -13,7 +13,7 @@ from indy.error import ErrorCode, IndyError
 from .models import IndySession, IndyWallet, AgentConnection, AgentConversation
 from .agent_utils import check_connection_status, handle_inbound_messages, poll_message_conversations
 
-AGENT_POLL_INTERVAL = 20
+AGENT_POLL_INTERVAL = 5
 
 
 @background(schedule=AGENT_POLL_INTERVAL)
@@ -40,10 +40,7 @@ def agent_background_task(message, user_id, session_key, org_id=None):
         for connection in connections:
             # validate connection and get the updated status
             try:
-                print(" >>> Checking connection", session.wallet_name, connection.partner_name)
                 upd_connection = check_connection_status(wallet, connection)
-
-                print(" >>> Updated connection for", session.wallet_name, upd_connection.id, upd_connection.partner_name, upd_connection.status)
             except IndyError as e:
                 print(" >>> Failed to update connection request for", session.wallet_name, connection.id, connection.partner_name)
                 raise e
@@ -53,19 +50,15 @@ def agent_background_task(message, user_id, session_key, org_id=None):
         for connection in connections:
             # check for outstanding, un-received messages - add to outstanding conversations
             try:
-                print(" >>> Checking for inbound messages", session.wallet_name, connection.id, connection.partner_name)
                 #if connection.connection_type == 'Inbound':
                 msg_count = handle_inbound_messages(wallet, connection)
-                print(" >>> Handled inbound messages", str(msg_count), session.wallet_name, connection.id, connection.partner_name)
             except IndyError as e:
                 print(" >>> Failed to handle inbound messages for", session.wallet_name, connection.id, connection.partner_name)
                 raise e
 
             # check status of any in-flight conversations (send/receive credential or request/provide proof)
             try:
-                print(" >>> Checking updated conversations", session.wallet_name, connection.id, connection.partner_name)
                 polled_count = poll_message_conversations(wallet, connection)
-                print(" >>> Handled conversations", str(polled_count), session.wallet_name, connection.id, connection.partner_name)
             except IndyError as e:
                 print(" >>> Failed to poll conversations for", session.wallet_name, connection.id, connection.partner_name)
                 raise e
