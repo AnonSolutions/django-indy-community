@@ -91,7 +91,7 @@ class IndyViewsTests(TestCase):
         resp = self.client.get(url, follow=True)
         self.assertEqual(resp.status_code, 200)
 
-        fetch_users = IndyUser.objects.filter(email=USER_USER).all()
+        fetch_users = User.objects.filter(email=USER_USER).all()
         self.assertEqual(1, len(fetch_users))
 
         self.cleanup_user(fetch_users[0], self.PASSWORD)
@@ -108,7 +108,7 @@ class IndyViewsTests(TestCase):
         resp = self.client.get(url, follow=True)
         self.assertEqual(resp.status_code, 200)
 
-        fetch_users = IndyUser.objects.filter(email=ORG_USER).all()
+        fetch_users = User.objects.filter(email=ORG_USER).all()
         self.assertEqual(1, len(fetch_users))
         fetch_orgs = IndyOrganization.objects.filter(org_name=ORG_NAME).all()
         self.assertEqual(1, len(fetch_orgs))
@@ -122,7 +122,7 @@ class IndyViewsTests(TestCase):
         self.register_and_login_org(ORG_USER, self.PASSWORD, 'Random', 'Name', ORG_NAME, 'Trustee')
         self.logout_user()
 
-        fetch_users = IndyUser.objects.filter(email=ORG_USER).all()
+        fetch_users = User.objects.filter(email=ORG_USER).all()
         self.assertEqual(1, len(fetch_users))
         fetch_orgs = IndyOrganization.objects.filter(org_name=ORG_NAME).all()
         self.assertEqual(1, len(fetch_orgs))

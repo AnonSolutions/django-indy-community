@@ -119,7 +119,7 @@ class IndyOrgRelationshipTests(TestCase):
             user=my_user,
         )
 
-        fetch_user = IndyUser.objects.filter(email='user@org.com').all()[0]
+        fetch_user = User.objects.filter(email='user@org.com').all()[0]
         self.assertEqual(len(fetch_user.indyrelationship_set.all()), 1)
         user_org = fetch_user.indyrelationship_set.all()[0].org
         self.assertEqual(user_org.org_name, 'My Org')
