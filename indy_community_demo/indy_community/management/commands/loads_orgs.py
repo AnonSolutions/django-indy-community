@@ -4,10 +4,10 @@ from django.contrib.auth import get_user_model
 import yaml
 import os
 
-from indy_core.utils import *
-from indy_core.models import *
-from indy_core.agent_utils import *
-from indy_core.registration_utils import *
+from indy_community.utils import *
+from indy_community.models import *
+from indy_community.agent_utils import *
+from indy_community.registration_utils import *
 
 
 class Command(BaseCommand):

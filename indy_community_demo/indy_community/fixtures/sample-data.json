@@ -1,6 +1,6 @@
 [
 {
-    "model": "indy_core.indyuser",
+    "model": "indy_community.indyuser",
     "pk": 1,
     "fields": {
         "password": "pbkdf2_sha256$120000$3RkPTsKyCYsj$6b1co+ufXlZIg6e5taEdvwpfjO62pUkNe/rdih7T58M=",

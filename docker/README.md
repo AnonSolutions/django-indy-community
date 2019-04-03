@@ -115,7 +115,7 @@ cargo run config.json
 5. Open 2 shells to run the Django Indy Community edition:
 
 ```bash
-cd django-indy-community/indy_community
+cd django-indy-community/indy_community_demo
 ./reload_db.sh
 python manage.py runserver
 ```
@@ -123,7 +123,7 @@ python manage.py runserver
 ... and run the "virtual agent" bot:
 
 ```bash
-cd django-indy-community/indy_community
+cd django-indy-community/indy_community_demo
 python manage.py process_tasks
 ```
 
@@ -150,7 +150,7 @@ rm -rf ~/.indy_client/
 2. Kill the two Django processes (CTRL-C) and reload the Test database:
 
 ```bash
-cd django-indy-community/indy_community
+cd django-indy-community/indy_community_demo
 ./reload_db.sh
 ```
 

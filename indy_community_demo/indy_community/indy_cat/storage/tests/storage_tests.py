@@ -3,9 +3,9 @@ from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from django.views.generic.edit import UpdateView
 
-from indy_core.models import *
-from indy_core.wallet_utils import *
-from indy_core.utils import *
+from indy_community.models import *
+from indy_community.wallet_utils import *
+from indy_community.utils import *
 
 from ..indy import *
 from ..record import *
