@@ -21,7 +21,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-    'indy_core.apps.IndyCoreConfig',
+    'indy_community.apps.IndyCoreConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -31,7 +31,7 @@ INSTALLED_APPS = [
     'background_task',
     'rest_framework',
     'indy_api',
-    'indy_community',
+    'indy_community_demo',
 ]
 
 def file_ext():
@@ -90,13 +90,13 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    #'indy_core.middleware.URLPermissionsMiddleware',
-    'indy_core.middleware.URLPermissionsMiddleware',
+    #'indy_community.middleware.URLPermissionsMiddleware',
+    'indy_community.middleware.URLPermissionsMiddleware',
 ]
 
-#AUTHENTICATION_BACKENDS = ['indy_core.indyauth.IndyBackend']
+#AUTHENTICATION_BACKENDS = ['indy_community.indyauth.IndyBackend']
 
-ROOT_URLCONF = 'indy_community.urls'
+ROOT_URLCONF = 'indy_community_demo.urls'
 
 #SESSION_COOKIE_AGE = 1800
 
@@ -116,7 +116,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'indy_community.wsgi.application'
+WSGI_APPLICATION = 'indy_community_demo.wsgi.application'
 
 LOGOUT_REDIRECT_URL = '/'
 URL_NAMESPACE_PATHS = (r'^(/[^/]+)?/(individual|organization)($|/.*$)',)
@@ -135,7 +135,7 @@ DATABASES = {
     }
 }
 
-AUTH_USER_MODEL = 'indy_core.IndyUser'
+AUTH_USER_MODEL = 'indy_community.IndyUser'
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators

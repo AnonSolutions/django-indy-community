@@ -82,7 +82,7 @@ class Migration(migrations.Migration):
             name='IndyOrgRelationship',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('org', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='indy_core.IndyOrganization')),
+                ('org', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='indy_community.IndyOrganization')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
@@ -128,31 +128,31 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='indyorganization',
             name='wallet',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='indy_core.IndyWallet', to_field='wallet_name'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='indy_community.IndyWallet', to_field='wallet_name'),
         ),
         migrations.AddField(
             model_name='indycredentialdefinition',
             name='ledger_schema',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='indy_core.IndySchema'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='indy_community.IndySchema'),
         ),
         migrations.AddField(
             model_name='indycredentialdefinition',
             name='wallet',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='indy_core.IndyWallet', to_field='wallet_name'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='indy_community.IndyWallet', to_field='wallet_name'),
         ),
         migrations.AddField(
             model_name='agentconversation',
             name='wallet',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='indy_core.IndyWallet', to_field='wallet_name'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='indy_community.IndyWallet', to_field='wallet_name'),
         ),
         migrations.AddField(
             model_name='agentconnection',
             name='wallet',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='indy_core.IndyWallet', to_field='wallet_name'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='indy_community.IndyWallet', to_field='wallet_name'),
         ),
         migrations.AddField(
             model_name='indyuser',
             name='wallet',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='indy_core.IndyWallet', to_field='wallet_name'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='indy_community.IndyWallet', to_field='wallet_name'),
         ),
     ]

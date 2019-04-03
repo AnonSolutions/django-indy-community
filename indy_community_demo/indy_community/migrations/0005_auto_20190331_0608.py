@@ -22,7 +22,7 @@ def delete_user_roles(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('indy_core', '0004_auto_20190328_0248'),
+        ('indy_community', '0004_auto_20190328_0248'),
     ]
 
     operations = [

@@ -192,7 +192,7 @@ shell)
 django)
   _startupParams=$(getStartupParams $@)
   configureEnvironment $@
-  docker-compose run -w /home/indy/indy_community/indy_community indy-django python manage.py $@
+  docker-compose run -w /home/indy/indy_community_demo/indy_community_demo indy-django python manage.py $@
   ;;
 *)
   usage

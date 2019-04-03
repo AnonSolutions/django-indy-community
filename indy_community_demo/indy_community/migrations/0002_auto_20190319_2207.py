@@ -8,19 +8,19 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('indy_core', '0001_initial'),
+        ('indy_community', '0001_initial'),
     ]
 
     operations = [
         migrations.AlterField(
             model_name='indycredentialdefinition',
             name='wallet',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='indycreddef_set', to='indy_core.IndyWallet', to_field='wallet_name'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='indycreddef_set', to='indy_community.IndyWallet', to_field='wallet_name'),
         ),
         migrations.AlterField(
             model_name='indyorgrelationship',
             name='org',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='indyrelationship_set', to='indy_core.IndyOrganization'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='indyrelationship_set', to='indy_community.IndyOrganization'),
         ),
         migrations.AlterField(
             model_name='indyorgrelationship',

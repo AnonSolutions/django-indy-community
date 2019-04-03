@@ -102,11 +102,11 @@ async def save_pool_genesis_txn_file(path):
 
 
 class IndyCoreConfig(AppConfig):
-    name = 'indy_core'
+    name = 'indy_community'
 
     def ready(self):
         # import login/logout signals
-        import indy_core.signals
+        import indy_community.signals
 
         pg_dll = settings.INDY_CONFIG['storage_dll']
         pg_entrypoint = settings.INDY_CONFIG['storage_entrypoint']

@@ -9,7 +9,7 @@ from ..wallet_utils import *
 from ..models import *
 from ..views import *
 from ..forms import *
-import indy_core.management.commands.loads_schemas
+import indy_community.management.commands.loads_schemas
 
 User = get_user_model()
 
