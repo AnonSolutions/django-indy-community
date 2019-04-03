@@ -158,7 +158,7 @@ def handle_connection_request(request):
             wallet_owner = request.session['wallet_owner']
 
             # get user or org associated with target partner
-            target_user = IndyUser.objects.filter(email=partner_name).all()
+            target_user = get_user_model().objects.filter(email=partner_name).all()
             target_org = IndyOrganization.objects.filter(org_name=partner_name).all()
 
             if 0 < len(target_user):
