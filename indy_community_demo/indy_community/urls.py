@@ -1,10 +1,14 @@
 from django.urls import path, include
 from django.conf.urls import url
 from django.contrib.auth import views as auth_views
+from django.conf import settings
 
 #from .forms import *
 from .views import *
 
+
+USER_NAMESPACE = getattr(settings, "USER_NAMESPACE", 'individual')
+ORG_NAMESPACE = getattr(settings, "ORG_NAMESPACE", 'organization')
 
 #app_name = "indy"
 
@@ -62,7 +66,7 @@ organizationpatterns = [
     path('', include(sharedpatterns)),
 ]
 
-urlpatterns.append(path('individual/', include((individualpatterns, 'indy'), namespace='individual')))
-urlpatterns.append(path('organization/', include((organizationpatterns, 'indy'), namespace='organization')))
+urlpatterns.append(path(USER_NAMESPACE+'/', include((individualpatterns, 'indy'), namespace=USER_NAMESPACE)))
+urlpatterns.append(path(ORG_NAMESPACE+'/', include((organizationpatterns, 'indy'), namespace=ORG_NAMESPACE)))
 
 
