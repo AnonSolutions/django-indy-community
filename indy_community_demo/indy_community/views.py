@@ -2,14 +2,29 @@ from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, get_user_model, login
 from django.urls import reverse
+from django.conf import settings
 
 from .forms import *
 from .models import *
 from .wallet_utils import *
 from .registration_utils import *
 from .agent_utils import *
-from .signals import handle_wallet_login_internal, namespaced_template
+from .signals import handle_wallet_login_internal
 
+
+USER_ROLE = getattr(settings, "DEFAULT_USER_ROLE", 'User')
+ORG_ROLE = getattr(settings, "DEFAULT_ORG_ROLE", 'Admin')
+USER_NAMESPACE = getattr(settings, "USER_NAMESPACE", 'individual') + ':'
+ORG_NAMESPACE = getattr(settings, "ORG_NAMESPACE", 'organization') + ':'
+
+# templates have a fixed location in Indy folder
+def namespaced_template(request, path):
+    namespace = request.session['URL_NAMESPACE']
+    namespace = namespace.replace(':', '')
+    if namespace == ORG_NAMESPACE:
+        return 'indy/organization/' + path
+    else:
+        return 'indy/individual/' + path
 
 ###############################################################
 # UI views to support user and organization registration
@@ -106,15 +121,6 @@ def individual_profile_view(request):
 def individual_wallet_view(request):
     return render(request, 'indy/individual_wallet.html')
 
-#def individual_connections_view(request):
-#    return render(request, 'indy/individual_connections.html')
-
-#def individual_conversations_view(request):
-#    return render(request, 'indy/individual_conversations.html')
-
-#def individual_credentials_view(request):
-#    return render(request, 'indy/individual_credentials.html')
-
 def organization_profile_view(request):
     return render(request, 'indy/organization_profile.html')
 
@@ -123,15 +129,6 @@ def organization_data_view(request):
 
 def organization_wallet_view(request):
     return render(request, 'indy/organization_wallet.html')
-
-#def organization_connections_view(request):
-#    return render(request, 'indy/organization_connections.html')
-
-#def organization_conversations_view(request):
-#    return render(request, 'indy/organization_conversations.html')
-
-#def organization_credentials_view(request):
-#    return render(request, 'indy/organization_credentials.html')
 
 
 ######################################################################

@@ -1,5 +1,6 @@
 from django.contrib.auth.signals import user_logged_in, user_logged_out
 from django.contrib.auth import get_user_model
+from django.conf import settings
 
 import json
 
@@ -8,17 +9,16 @@ from .tasks import *
 from .wallet_utils import *
 
 
+USER_ROLE = getattr(settings, "DEFAULT_USER_ROLE", 'User')
+ORG_ROLE = getattr(settings, "DEFAULT_ORG_ROLE", 'Admin')
+USER_NAMESPACE = getattr(settings, "USER_NAMESPACE", 'individual') + ':'
+ORG_NAMESPACE = getattr(settings, "ORG_NAMESPACE", 'organization') + ':'
+
 def url_namespace(role):
-    if role == 'Admin':
-        return 'organization:'
+    if role == ORG_ROLE:
+        return ORG_NAMESPACE
     else:
-        return 'individual:'
-
-
-def namespaced_template(request, path):
-    namespace = request.session['URL_NAMESPACE']
-    namespace = namespace.replace(':', '')
-    return 'indy/' + namespace + '/' + path
+        return USER_NAMESPACE
 
 
 def user_wallet_logged_in_handler(request, user, wallet_name):

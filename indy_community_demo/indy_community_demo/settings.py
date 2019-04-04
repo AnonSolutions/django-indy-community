@@ -90,7 +90,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    #'indy_community.middleware.URLPermissionsMiddleware',
     'indy_community.middleware.URLPermissionsMiddleware',
 ]
 
@@ -118,11 +117,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'indy_community_demo.wsgi.application'
 
+DEFAULT_USER_ROLE = 'User'
+DEFAULT_ORG_ROLE = 'Admin'
+USER_NAMESPACE = 'individual'
+ORG_NAMESPACE = 'organization'
+
 LOGOUT_REDIRECT_URL = '/'
-URL_NAMESPACE_PATHS = (r'^(/[^/]+)?/(individual|organization)($|/.*$)',)
+URL_NAMESPACE_PATHS = (r'^(/[^/]+)?/(USER_NAMESPACE|ORG_NAMESPACE)($|/.*$)',)
 URL_NAMESPACE_PERMISSIONS = {
-    'individual': ('User',),
-    'organization': ('Admin',),
+    USER_NAMESPACE: (DEFAULT_USER_ROLE, 'Attendee'),
+    ORG_NAMESPACE: (DEFAULT_ORG_ROLE,),
 }
 
 # Database
