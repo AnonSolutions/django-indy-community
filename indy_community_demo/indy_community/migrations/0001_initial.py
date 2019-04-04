@@ -83,7 +83,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('org', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='indy_community.IndyOrganization')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='indy_community.IndyUser')),
             ],
         ),
         migrations.CreateModel(
@@ -114,7 +114,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('wallet_name', models.CharField(blank=True, max_length=30, null=True)),
                 ('session', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sessions.Session')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='indy_community.IndyUser')),
             ],
         ),
         migrations.CreateModel(

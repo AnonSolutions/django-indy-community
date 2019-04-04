@@ -25,6 +25,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='indyorgrelationship',
             name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='indyrelationship_set', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='indyrelationship_set', to='indy_community.IndyUser'),
         ),
     ]
