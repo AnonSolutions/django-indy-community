@@ -4,7 +4,6 @@
 {% load static %}
 
 {% block main_content %}
-{% with request.session.URL_NAMESPACE as namespace %}
   <div class='inside-body'>
     <div class='center-body'>
       <div class='innercont-center-body'>
@@ -12,7 +11,7 @@
           <div class='form-cont'>
             <h2>{% trans "Poll for Messages" %}</h2>
             <div class='newsfeed-post-seperator'></div>
-            <form action="{% url namespace|add:'check_messages' %}" method="POST">
+            <form action="{% url 'check_messages' %}" method="POST">
               {% csrf_token %}
               {% for field in form %}
                 <div>
@@ -30,5 +29,4 @@
       </div>
     </div>
   </div>
-{% endwith %}
 {% endblock %}

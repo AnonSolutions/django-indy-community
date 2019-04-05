@@ -2,14 +2,18 @@ from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, get_user_model, login
 from django.urls import reverse
+from django.conf import settings
 
 from .forms import *
 from .models import *
 from .wallet_utils import *
 from .registration_utils import *
 from .agent_utils import *
-from .signals import handle_wallet_login_internal, namespaced_template
+from .signals import handle_wallet_login_internal
 
+
+USER_ROLE = getattr(settings, "DEFAULT_USER_ROLE", 'User')
+ORG_ROLE = getattr(settings, "DEFAULT_ORG_ROLE", 'Admin')
 
 ###############################################################
 # UI views to support user and organization registration
@@ -24,8 +28,8 @@ def user_signup_view(request):
             raw_password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=raw_password)
 
-            if Group.objects.filter(name='User').exists():
-                user.groups.add(Group.objects.get(name='User'))
+            if Group.objects.filter(name=USER_ROLE).exists():
+                user.groups.add(Group.objects.get(name=USER_ROLE))
             user.save()
 
             # create an Indy wallet - derive wallet name from email, and re-use raw password
@@ -100,38 +104,14 @@ def wallet_for_current_session(request):
 ###############################################################
 # UI views to support wallet and agent UI functions
 ###############################################################
-def individual_profile_view(request):
-    return render(request, 'indy/individual_profile.html')
+def profile_view(request):
+    return render(request, 'indy/profile.html')
 
-def individual_wallet_view(request):
-    return render(request, 'indy/individual_wallet.html')
+def data_view(request):
+    return render(request, 'indy/data.html')
 
-#def individual_connections_view(request):
-#    return render(request, 'indy/individual_connections.html')
-
-#def individual_conversations_view(request):
-#    return render(request, 'indy/individual_conversations.html')
-
-#def individual_credentials_view(request):
-#    return render(request, 'indy/individual_credentials.html')
-
-def organization_profile_view(request):
-    return render(request, 'indy/organization_profile.html')
-
-def organization_data_view(request):
-    return render(request, 'indy/organization_data.html')
-
-def organization_wallet_view(request):
-    return render(request, 'indy/organization_wallet.html')
-
-#def organization_connections_view(request):
-#    return render(request, 'indy/organization_connections.html')
-
-#def organization_conversations_view(request):
-#    return render(request, 'indy/organization_conversations.html')
-
-#def organization_credentials_view(request):
-#    return render(request, 'indy/organization_credentials.html')
+def wallet_view(request):
+    return render(request, 'indy/wallet.html')
 
 
 ######################################################################
@@ -141,7 +121,7 @@ def list_connections(request):
     # expects a wallet to be opened in the current session
     wallet = wallet_for_current_session(request)
     connections = AgentConnection.objects.filter(wallet=wallet).all()
-    return render(request, namespaced_template(request, 'connection/list.html'), {'wallet_name': wallet.wallet_name, 'connections': connections})
+    return render(request, 'indy/connection/list.html', {'wallet_name': wallet.wallet_name, 'connections': connections})
 
 
 def handle_connection_request(request):
@@ -333,7 +313,7 @@ def list_conversations(request):
     # expects a wallet to be opened in the current session
     wallet = wallet_for_current_session(request)
     conversations = AgentConversation.objects.filter(wallet=wallet).all()
-    return render(request, namespaced_template(request, 'conversation/list.html'), {'wallet_name': wallet.wallet_name, 'conversations': conversations})
+    return render(request, 'indy/conversation/list.html', {'wallet_name': wallet.wallet_name, 'conversations': conversations})
 
 
 def handle_select_credential_offer(request):
@@ -737,7 +717,7 @@ def list_wallet_credentials(request):
         credentials = run_coroutine_with_args(prover_fetch_credentials, search_handle, search_count)
         run_coroutine_with_args(prover_close_credentials_search, search_handle)
 
-        return render(request, namespaced_template(request, 'credential/list.html'), {'wallet_name': wallet.wallet_name, 'credentials': json.loads(credentials)})
+        return render(request, 'indy/credential/list.html', {'wallet_name': wallet.wallet_name, 'credentials': json.loads(credentials)})
     except:
         raise
     finally:

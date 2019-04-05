@@ -1,5 +1,6 @@
 from django.contrib.auth.signals import user_logged_in, user_logged_out
 from django.contrib.auth import get_user_model
+from django.conf import settings
 
 import json
 
@@ -8,18 +9,14 @@ from .tasks import *
 from .wallet_utils import *
 
 
-def url_namespace(role):
-    if role == 'Admin':
-        return 'organization:'
+USER_ROLE = getattr(settings, "DEFAULT_USER_ROLE", 'User')
+ORG_ROLE = getattr(settings, "DEFAULT_ORG_ROLE", 'Admin')
+
+def url_indy_profile(role):
+    if role == ORG_ROLE:
+        return 'indy/base_organization_profile.html'
     else:
-        return 'individual:'
-
-
-def namespaced_template(request, path):
-    namespace = request.session['URL_NAMESPACE']
-    namespace = namespace.replace(':', '')
-    return 'indy/' + namespace + '/' + path
-
+        return 'indy/base_individual_profile.html'
 
 def user_wallet_logged_in_handler(request, user, wallet_name):
     print("Login wallet, {} {} {}".format(user.email, request.session.session_key, wallet_name))
@@ -85,8 +82,8 @@ def handle_wallet_logout_internal(request):
 
 def init_user_session(sender, user, request, **kwargs):
     target = request.POST.get('next', '/individual/')
-    if 'organization' in target and user.has_role('Admin'):
-        request.session['ACTIVE_ROLE'] = 'Admin'
+    if user.has_role(ORG_ROLE):
+        request.session['ACTIVE_ROLE'] = ORG_ROLE
         orgs = IndyOrgRelationship.objects.filter(user=user).all()
         if 0 < len(orgs):
             sel_org = orgs[0].org
@@ -98,11 +95,11 @@ def init_user_session(sender, user, request, **kwargs):
                 config = json.loads(sel_wallet.wallet_config)
                 handle_wallet_login_internal(request, user, config['wallet_name'], config['wallet_key'])
     else:
-        if user.has_role('User'):
-            request.session['ACTIVE_ROLE'] = 'User'
+        if user.has_role(USER_ROLE):
+            request.session['ACTIVE_ROLE'] = USER_ROLE
         else:
             # TODO for now just set a dummy default - logged in user with no role assigned
-            request.session['ACTIVE_ROLE'] = 'User'
+            request.session['ACTIVE_ROLE'] = USER_ROLE
 
         # try to login as user wallet
         if user.wallet is not None:
@@ -111,8 +108,7 @@ def init_user_session(sender, user, request, **kwargs):
             handle_wallet_login_internal(request, user, config['wallet_name'], config['wallet_key'])
 
     role = request.session['ACTIVE_ROLE']
-    namespace = url_namespace(role)
-    request.session['URL_NAMESPACE'] = namespace
+    request.session['INDY_PROFILE'] = url_indy_profile(role)
 
     # setup background "virtual agent"
     user_logged_in_handler(sender, user, request, **kwargs)
@@ -126,7 +122,7 @@ def clear_user_session(sender, user, request, **kwargs):
         del request.session['ACTIVE_ROLE']
     if 'ACTIVE_ORG' in request.session:
         del request.session['ACTIVE_ORG']
-    request.session['URL_NAMESPACE'] = ''
+    request.session['INDY_PROFILE'] = ''
 
 
 user_logged_in.connect(init_user_session)

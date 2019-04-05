@@ -1,7 +1,6 @@
 {% load i18n %}
 {% load static %}
 
-{% with request.session.URL_NAMESPACE as namespace %}
 <div class='profile-msgs'>
 	<div class='profile-msgs-left'>
 	<h4>Your Connections</h4>
@@ -23,19 +22,19 @@
 			<h5>
 		        {% if conversation.status == 'Pending' %}
 		          {% if conversation.conversation_type == 'CredentialOffer' %}
-		            <a href={% url namespace|add:'cred_offer_response' %}?conversation_id={{conversation.id}}>Accept Offer</a>
+		            <a href={% url 'cred_offer_response' %}?conversation_id={{conversation.id}}>Accept Offer</a>
 		          {% endif %}
 		          {% if conversation.conversation_type == 'ProofRequest' %}
-		            <a href={% url namespace|add:'proof_req_response' %}?conversation_id={{conversation.id}}>Supply Proof</a>
+		            <a href={% url 'proof_req_response' %}?conversation_id={{conversation.id}}>Supply Proof</a>
 		          {% endif %}
 		        {% endif %}
 		        {% if conversation.status == 'Sent' %}
-		            <a href={% url namespace|add:'check_conversation' %}?conversation_id={{conversation.id}}>Check Status</a>
+		            <a href={% url 'check_conversation' %}?conversation_id={{conversation.id}}>Check Status</a>
 		        {% endif %}
 		        {% if conversation.status == 'Accepted' %}
 		            [Completed]
 		          {% if conversation.conversation_type == 'ProofRequest' %}
-		            Proof is <a href={% url namespace|add:'view_proof' %}?conversation_id={{conversation.id}}>
+		            Proof is <a href={% url 'view_proof' %}?conversation_id={{conversation.id}}>
 		            {{ conversation.proof_state }}</a>
 		          {% endif %}
 		        {% endif %}
@@ -47,4 +46,3 @@
 
 	</div>
 </div>
-{% endwith %}

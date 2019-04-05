@@ -17,30 +17,28 @@
 		</div>
 
 		<div class='profile-bottom-cont profile-anon-bottom-cont'>
-	        {% with request.session.URL_NAMESPACE as namespace %}
 			<div class='profile-nav-cont profile-anon-nav-cont'>
 				<div class='profile-nav'>
 					<div class='profile-nav-btn profile-nav-btn-profile active-profile-nav'>
-						<a href="{% url namespace|add:'profile' %}"><h5>Profile</h5><i class="fas fa-plus"></i></a>
+						<a href="{% url 'indy_profile' %}"><h5>Profile</h5><i class="fas fa-plus"></i></a>
 					</div>
 					<div class='profile-nav-btn profile-nav-btn-data'>
-						<a href="{% url namespace|add:'org_data' %}"><h5>Acquired User Data</h5><i class="fas fa-plus"></i></a>
+						<a href="{% url 'indy_org_data' %}"><h5>Acquired User Data</h5><i class="fas fa-plus"></i></a>
 					</div>
 					<div class='profile-nav-btn profile-nav-btn-wallet'>
-						<a href="{% url namespace|add:'wallet' %}"><h5>Wallet</h5><i class="fas fa-plus"></i></a>
+						<a href="{% url 'indy_wallet' %}"><h5>Wallet</h5><i class="fas fa-plus"></i></a>
 					</div>
 					<div class='profile-nav-btn profile-nav-btn-connections'>
-						<a href="{% url namespace|add:'connections' %}"><h5>Connections</h5><i class="fas fa-plus"></i></a>
+						<a href="{% url 'connections' %}"><h5>Connections</h5><i class="fas fa-plus"></i></a>
 					</div>
 					<div class='profile-nav-btn profile-nav-btn-conversations'>
-						<a href="{% url namespace|add:'conversations' %}"><h5>Conversations</h5><i class="fas fa-plus"></i></a>
+						<a href="{% url 'conversations' %}"><h5>Conversations</h5><i class="fas fa-plus"></i></a>
 					</div>
 					<div class='profile-nav-btn profile-nav-btn-credentials'>
-						<a href="{% url namespace|add:'credentials' %}"><h5>Credentials</h5><i class="fas fa-plus"></i></a>
+						<a href="{% url 'credentials' %}"><h5>Credentials</h5><i class="fas fa-plus"></i></a>
 					</div>
 				</div>
 			</div>
-            {% endwith %}
 
 			<div class='profile-tab-cont'>
 				<div class='profile-search-input'>

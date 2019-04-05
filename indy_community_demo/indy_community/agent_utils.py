@@ -122,7 +122,6 @@ def create_schema(wallet, schema_json, schema_template):
     """
     Create a schema (VCX) and also store in our local database
     """
-    print(" >>> Initialize libvcx with trustee configuration")
     try:
         config_json = wallet.wallet_config
         run_coroutine_with_args(vcx_init_with_config, config_json)
@@ -148,7 +147,6 @@ def create_schema(wallet, schema_json, schema_template):
     except:
         raise
     finally:
-        print(" >>> Shutdown vcx (for now)")
         try:
             shutdown(False)
         except:
@@ -163,7 +161,6 @@ def create_creddef(wallet, indy_schema, creddef_name, creddef_template):
     Create a credential definition (VCX) and also store in our local database
     """
     # wallet specific-configuration for creatig the cred def
-    print(" >>> Initialize libvcx with wallet-specific configuration")
     try:
         config_json = wallet.wallet_config
         run_coroutine_with_args(vcx_init_with_config, config_json)
@@ -190,13 +187,10 @@ def create_creddef(wallet, indy_schema, creddef_name, creddef_template):
     except:
         raise
     finally:
-        print(" >>> Shutdown vcx (for now)")
         try:
             shutdown(False)
         except:
             raise
-
-    print(" >>> Done!!!")
 
     return indy_creddef
 
@@ -223,7 +217,6 @@ def create_proof_request(name, description, attrs, predicates):
 ######################################################################
 
 def send_connection_invitation(wallet, partner_name):
-    print(" >>> Initialize libvcx with new configuration for a connection to", partner_name)
     try:
         config_json = wallet.wallet_config
         run_coroutine_with_args(vcx_init_with_config, config_json)
@@ -253,18 +246,15 @@ def send_connection_invitation(wallet, partner_name):
     except:
         raise
     finally:
-        print(" >>> Shutdown vcx (for now)")
         try:
             shutdown(False)
         except:
             raise
 
-    print(" >>> Done!!!")
     return connection
 
 
 def send_connection_confirmation(wallet, partner_name, invite_details):
-    print(" >>> Initialize libvcx with configuration")
     try:
         config_json = wallet.wallet_config
         run_coroutine_with_args(vcx_init_with_config, config_json)
@@ -298,18 +288,15 @@ def send_connection_confirmation(wallet, partner_name, invite_details):
     except:
         raise
     finally:
-        print(" >>> Shutdown vcx (for now)")
         try:
             shutdown(False)
         except:
             raise
 
-    print(" >>> Done!!!")
     return connection
 
 
 def check_connection_status(wallet, connection):
-    print(" >>> Initialize libvcx with configuration")
     try:
         config_json = wallet.wallet_config
         run_coroutine_with_args(vcx_init_with_config, config_json)
@@ -338,13 +325,11 @@ def check_connection_status(wallet, connection):
     except:
         raise
     finally:
-        print(" >>> Shutdown vcx (for now)")
         try:
             shutdown(False)
         except:
             raise
 
-    print(" >>> Done!!!")
     return my_connection
 
 
@@ -353,7 +338,6 @@ def check_connection_status(wallet, connection):
 ######################################################################
 
 def send_credential_offer(wallet, connection, credential_tag, schema_attrs, cred_def, credential_name):
-    print(" >>> Initialize libvcx with new configuration for a cred offer to", connection.partner_name)
     try:
         config_json = wallet.wallet_config
         run_coroutine_with_args(vcx_init_with_config, config_json)
@@ -369,7 +353,6 @@ def send_credential_offer(wallet, connection, credential_tag, schema_attrs, cred
         # create a credential (the last '0' is the 'price')
         credential = run_coroutine_with_args(IssuerCredential.create, credential_tag, schema_attrs, int(cred_def_handle), credential_name, '0')
 
-        print("Issue credential offer to", connection.partner_name)
         run_coroutine_with_args(credential.send_offer, my_connection)
 
         # serialize/deserialize credential - waiting for Alice to rspond with Credential Request
@@ -386,18 +369,15 @@ def send_credential_offer(wallet, connection, credential_tag, schema_attrs, cred
     except:
         raise
     finally:
-        print(" >>> Shutdown vcx (for now)")
         try:
             shutdown(False)
         except:
             raise
 
-    print(" >>> Done!!!")
     return conversation
     
 
 def send_credential_request(wallet, connection, conversation):
-    print(" >>> Initialize libvcx with new configuration for a cred offer to", connection.partner_name)
     try:
         config_json = wallet.wallet_config
         run_coroutine_with_args(vcx_init_with_config, config_json)
@@ -409,11 +389,9 @@ def send_credential_request(wallet, connection, conversation):
         my_connection = run_coroutine_with_args(Connection.deserialize, json.loads(connection.connection_data))
         #my_offer = run_coroutine_with_args()
     
-        print("Create a credential object from the credential offer")
         offer_json = [json.loads(conversation.conversation_data),]
         credential = run_coroutine_with_args(Credential.create, 'credential', offer_json)
 
-        print("After receiving credential offer, send credential request")
         run_coroutine_with_args(credential.send_request, my_connection, 0)
 
         # serialize/deserialize credential - wait for Faber to send credential
@@ -426,13 +404,11 @@ def send_credential_request(wallet, connection, conversation):
     except:
         raise
     finally:
-        print(" >>> Shutdown vcx (for now)")
         try:
             shutdown(False)
         except:
             raise
 
-    print(" >>> Done!!!")
     return conversation
 
 
@@ -441,7 +417,6 @@ def send_credential_request(wallet, connection, conversation):
 ######################################################################
 
 def send_proof_request(wallet, connection, proof_uuid, proof_name, proof_attrs, proof_predicates):
-    print(" >>> Initialize libvcx with new configuration for a cred offer to", connection.partner_name)
     try:
         config_json = wallet.wallet_config
         run_coroutine_with_args(vcx_init_with_config, config_json)
@@ -473,18 +448,15 @@ def send_proof_request(wallet, connection, proof_uuid, proof_name, proof_attrs, 
     except:
         raise
     finally:
-        print(" >>> Shutdown vcx (for now)")
         try:
             shutdown(False)
         except:
             raise
 
-    print(" >>> Done!!!")
     return conversation
 
 
 def get_claims_for_proof_request(wallet, connection, my_conversation):
-    print(" >>> Initialize libvcx with new configuration for a cred offer to", connection.partner_name)
     try:
         config_json = wallet.wallet_config
         run_coroutine_with_args(vcx_init_with_config, config_json)
@@ -502,13 +474,11 @@ def get_claims_for_proof_request(wallet, connection, my_conversation):
     except:
         raise
     finally:
-        print(" >>> Shutdown vcx (for now)")
         try:
             shutdown(False)
         except:
             raise
 
-    print(" >>> Done!!!")
     return creds_for_proof
 
 
@@ -519,7 +489,6 @@ def cred_for_referent(creds_for_proof, attr, schema_id):
     return None
 
 def send_claims_for_proof_request(wallet, connection, my_conversation, credential_attrs):
-    print(" >>> Initialize libvcx with new configuration for a cred offer to", connection.partner_name)
     try:
         config_json = wallet.wallet_config
         run_coroutine_with_args(vcx_init_with_config, config_json)
@@ -537,7 +506,6 @@ def send_claims_for_proof_request(wallet, connection, my_conversation, credentia
         self_attested = {}
         for attr in creds_for_proof['attrs']:
             selected = credential_attrs[attr]
-            print(attr, selected)
             if 'referent' in selected:
                 creds_for_proof['attrs'][attr] = {
                     'credential': cred_for_referent(creds_for_proof, attr, selected['referent'])
@@ -563,13 +531,11 @@ def send_claims_for_proof_request(wallet, connection, my_conversation, credentia
     except:
         raise
     finally:
-        print(" >>> Shutdown vcx (for now)")
         try:
             shutdown(False)
         except:
             raise
 
-    print(" >>> Done!!!")
     return proof_data
 
 
@@ -578,7 +544,6 @@ def send_claims_for_proof_request(wallet, connection, my_conversation, credentia
 ######################################################################
 
 def handle_inbound_messages(my_wallet, my_connection):
-    print(" >>> Initialize libvcx with configuration")
     try:
         config_json = my_wallet.wallet_config
         run_coroutine_with_args(vcx_init_with_config, config_json)
@@ -591,7 +556,6 @@ def handle_inbound_messages(my_wallet, my_connection):
         connection_to_ = run_coroutine_with_args(Connection.deserialize, connection_data)
 
         if my_connection.connection_type == 'Inbound':
-            print(" >>> Check for and receive offers")
             offers = run_coroutine_with_args(Credential.get_offers, connection_to_)
             for offer in offers:
                 already_handled = AgentConversation.objects.filter(message_id=offer[0]['msg_ref_id']).all()
@@ -606,11 +570,9 @@ def handle_inbound_messages(my_wallet, my_connection):
                                         status = 'Pending',
                                         conversation_data = offer_data
                                     )
-                    print(" >>> Saving received offer to DB")
                     new_offer.save()
                     handled_count = handled_count + 1
 
-        print(" >>> Check for and handle proof requests")
         requests = run_coroutine_with_args(DisclosedProof.get_requests, connection_to_)
         for request in requests:
             already_handled = AgentConversation.objects.filter(message_id=request['msg_ref_id']).all()
@@ -625,22 +587,17 @@ def handle_inbound_messages(my_wallet, my_connection):
                                     status = 'Pending',
                                     conversation_data = request_data
                                 )
-                print(" >>> Saving received proof request to DB")
                 new_request.save()
                 handled_count = handled_count + 1
     except:
         print("Error polling offers and proof requests")
         # TODO ignore polling errors for now ...
         raise
-        pass
     finally:
-        print(" >>> Shutdown vcx (for now)")
         try:
             shutdown(False)
         except:
             raise
-
-    print(" >>> Done!!!")
 
     return handled_count
 
