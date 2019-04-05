@@ -82,7 +82,7 @@ def handle_wallet_logout_internal(request):
 
 def init_user_session(sender, user, request, **kwargs):
     target = request.POST.get('next', '/individual/')
-    if 'organization' in target and user.has_role(ORG_ROLE):
+    if user.has_role(ORG_ROLE):
         request.session['ACTIVE_ROLE'] = ORG_ROLE
         orgs = IndyOrgRelationship.objects.filter(user=user).all()
         if 0 < len(orgs):
