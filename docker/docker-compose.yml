@@ -49,7 +49,7 @@ services:
   # wallet-db
   # 
   wallet-db:
-    image: postgresql
+    image: postgres:latest
     environment:
       - POSTGRESQL_USER=${POSTGRESQL_USER}
       - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
