@@ -7,7 +7,7 @@
 		<div class='topnav-con topnav-title'>
 			<div class='topnav-item'>
             {% if request.user.is_authenticated %}
-                <a href="{% url 'profile' %}">
+                <a href="{% url 'indy_profile' %}">
                    <img src="{% static "/anon/Anon5-letters.png" %}">
                 </a>
             {% else %}
@@ -21,7 +21,7 @@
 		<div class='topnav-con'>
 			{% if request.user.is_authenticated %}
 				<div class='topnav-item topnav-accountnamecon'>
-					<a href="{% url 'profile' %}">
+					<a href="{% url 'indy_profile' %}">
 						{{ request.user }} 
                         {% if request.session.ACTIVE_ROLE %}
                            [ {{ request.session.ACTIVE_ROLE }} ]
