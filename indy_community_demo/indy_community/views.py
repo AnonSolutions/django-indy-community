@@ -14,17 +14,6 @@ from .signals import handle_wallet_login_internal
 
 USER_ROLE = getattr(settings, "DEFAULT_USER_ROLE", 'User')
 ORG_ROLE = getattr(settings, "DEFAULT_ORG_ROLE", 'Admin')
-USER_NAMESPACE = getattr(settings, "USER_NAMESPACE", 'individual') + ':'
-ORG_NAMESPACE = getattr(settings, "ORG_NAMESPACE", 'organization') + ':'
-
-# templates have a fixed location in Indy folder
-def namespaced_template(request, path):
-    namespace = request.session['URL_NAMESPACE']
-    namespace = namespace.replace(':', '')
-    if namespace == ORG_NAMESPACE:
-        return 'indy/organization/' + path
-    else:
-        return 'indy/individual/' + path
 
 ###############################################################
 # UI views to support user and organization registration
@@ -39,8 +28,8 @@ def user_signup_view(request):
             raw_password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=raw_password)
 
-            if Group.objects.filter(name='User').exists():
-                user.groups.add(Group.objects.get(name='User'))
+            if Group.objects.filter(name=USER_ROLE).exists():
+                user.groups.add(Group.objects.get(name=USER_ROLE))
             user.save()
 
             # create an Indy wallet - derive wallet name from email, and re-use raw password
@@ -115,20 +104,14 @@ def wallet_for_current_session(request):
 ###############################################################
 # UI views to support wallet and agent UI functions
 ###############################################################
-def individual_profile_view(request):
-    return render(request, 'indy/individual_profile.html')
+def profile_view(request):
+    return render(request, 'indy/profile.html')
 
-def individual_wallet_view(request):
-    return render(request, 'indy/individual_wallet.html')
+def data_view(request):
+    return render(request, 'indy/data.html')
 
-def organization_profile_view(request):
-    return render(request, 'indy/organization_profile.html')
-
-def organization_data_view(request):
-    return render(request, 'indy/organization_data.html')
-
-def organization_wallet_view(request):
-    return render(request, 'indy/organization_wallet.html')
+def wallet_view(request):
+    return render(request, 'indy/wallet.html')
 
 
 ######################################################################
@@ -138,7 +121,7 @@ def list_connections(request):
     # expects a wallet to be opened in the current session
     wallet = wallet_for_current_session(request)
     connections = AgentConnection.objects.filter(wallet=wallet).all()
-    return render(request, namespaced_template(request, 'connection/list.html'), {'wallet_name': wallet.wallet_name, 'connections': connections})
+    return render(request, 'indy/connection/list.html', {'wallet_name': wallet.wallet_name, 'connections': connections})
 
 
 def handle_connection_request(request):
@@ -330,7 +313,7 @@ def list_conversations(request):
     # expects a wallet to be opened in the current session
     wallet = wallet_for_current_session(request)
     conversations = AgentConversation.objects.filter(wallet=wallet).all()
-    return render(request, namespaced_template(request, 'conversation/list.html'), {'wallet_name': wallet.wallet_name, 'conversations': conversations})
+    return render(request, 'indy/conversation/list.html', {'wallet_name': wallet.wallet_name, 'conversations': conversations})
 
 
 def handle_select_credential_offer(request):
@@ -734,7 +717,7 @@ def list_wallet_credentials(request):
         credentials = run_coroutine_with_args(prover_fetch_credentials, search_handle, search_count)
         run_coroutine_with_args(prover_close_credentials_search, search_handle)
 
-        return render(request, namespaced_template(request, 'credential/list.html'), {'wallet_name': wallet.wallet_name, 'credentials': json.loads(credentials)})
+        return render(request, 'indy/credential/list.html', {'wallet_name': wallet.wallet_name, 'credentials': json.loads(credentials)})
     except:
         raise
     finally:

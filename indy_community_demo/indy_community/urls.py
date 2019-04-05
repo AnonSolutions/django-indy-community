@@ -7,21 +7,12 @@ from django.conf import settings
 from .views import *
 
 
-USER_NAMESPACE = getattr(settings, "USER_NAMESPACE", 'individual')
-ORG_NAMESPACE = getattr(settings, "ORG_NAMESPACE", 'organization')
-
 #app_name = "indy"
 
 urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     path('signup/', user_signup_view, name='signup'),
     path('org_signup/', org_signup_view, name='org_signup'),
-    path('', auth_views.LoginView.as_view(), name='login'),
-]
-
-
-# URL patterns for all
-sharedpatterns = [
     path('send_invitation/', handle_connection_request, name='send_invitation'),
     path('list_connections/', list_connections, name='list_connections'),
     path('connection_response/', handle_connection_response, name='connection_response'),
@@ -39,34 +30,12 @@ sharedpatterns = [
     path('view_proof/', handle_view_proof, name='view_proof'),
     path('check_conversation/', poll_conversation_status, name='check_conversation'),
     path('list_credentials/', list_wallet_credentials, name='list_credentials'),
+    path('profile/', profile_view, name='profile'),
+    path('data/', data_view, name='org_data'),
+    path('wallet/', wallet_view, name='wallet'),
+    path('connections/', list_connections, name='connections'),
+    path('conversations/', list_conversations, name='conversations'),
+    path('credentials/', list_wallet_credentials, name='credentials'),
+    path('', auth_views.LoginView.as_view(), name='login'),
 ]
-
-# URL patterns specific to individuals
-individualpatterns = [
-    path('', include([
-        path('profile/', individual_profile_view, name='profile'),
-        path('wallet/', individual_wallet_view, name='wallet'),
-        path('connections/', list_connections, name='connections'),
-        path('conversations/', list_conversations, name='conversations'),
-        path('credentials/', list_wallet_credentials, name='credentials'),
-        ])),
-    path('', include(sharedpatterns)),
-]
-
-# URL patterns accessible only to organizations
-organizationpatterns = [
-    path('', include([
-        path('profile/', organization_profile_view, name='profile'),
-        path('data/', organization_data_view, name='org_data'),
-        path('wallet/', organization_wallet_view, name='wallet'),
-        path('connections/', list_connections, name='connections'),
-        path('conversations/', list_conversations, name='conversations'),
-        path('credentials/', list_wallet_credentials, name='credentials'),
-        ])),
-    path('', include(sharedpatterns)),
-]
-
-urlpatterns.append(path(USER_NAMESPACE+'/', include((individualpatterns, 'indy'), namespace=USER_NAMESPACE)))
-urlpatterns.append(path(ORG_NAMESPACE+'/', include((organizationpatterns, 'indy'), namespace=ORG_NAMESPACE)))
-
 

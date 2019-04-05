@@ -1,7 +1,6 @@
 {% load i18n %}
 {% load static %}
 
-{% with request.session.URL_NAMESPACE as namespace %}
 <div class='newsfeed-posted-cont'>
 	<div class='newsfeed-posted-info'>
 		<div>
@@ -11,11 +10,11 @@
 		</div>
 		<div>
 			<h5>
-				<a href="{% url namespace|add:'send_invitation' %}">{% trans "Send Connection Invite" %}</a>
+				<a href="{% url 'send_invitation' %}">{% trans "Send Connection Invite" %}</a>
                 or:
-				<a href="{% url namespace|add:'connection_response' %}?id=0">{% trans "Respond to (External) Invite" %}</a>
+				<a href="{% url 'connection_response' %}?id=0">{% trans "Respond to (External) Invite" %}</a>
                 or: 
-                <a href="{% url namespace|add:'check_messages' %}">Poll for Messages on All Connections</a>
+                <a href="{% url 'check_messages' %}">Poll for Messages on All Connections</a>
             </h5>
 		</div>
 	</div>
@@ -39,19 +38,19 @@
         		<div>
         			<h5>Connection Status: {{ connection.status }}
         		        {% if connection.status == 'Pending' %}
-        		            <a href="{% url namespace|add:'connection_response' %}?id={{connection.id}}"}>Respond</a>
+        		            <a href="{% url 'connection_response' %}?id={{connection.id}}"}>Respond</a>
         		        {% endif %}
         		        {% if connection.status == 'Sent' %}
-        		            <a href="{% url namespace|add:'check_connection' %}?id={{connection.id}}">Check Status</a>
+        		            <a href="{% url 'check_connection' %}?id={{connection.id}}">Check Status</a>
         		        {% endif %}
                         {% if connection.status == 'Active' %}
                           {% if connection.connection_type == 'Outbound' %}
-                            <a href="{% url namespace|add:'select_credential_offer' %}?connection_id={{connection.id}}">Send Credential</a> 
+                            <a href="{% url 'select_credential_offer' %}?connection_id={{connection.id}}">Send Credential</a> 
                             or 
                           {% endif %}
-                          <a href="{% url namespace|add:'select_proof_request' %}?connection_id={{connection.id}}">Send Proof Request</a>
+                          <a href="{% url 'select_proof_request' %}?connection_id={{connection.id}}">Send Proof Request</a>
                             or
-                            <a href="{% url namespace|add:'check_messages' %}?connection_id={{connection.id}}">Poll for Messages</a>
+                            <a href="{% url 'check_messages' %}?connection_id={{connection.id}}">Poll for Messages</a>
                         {% endif %}
         			</h5>
         		</div>
@@ -61,4 +60,3 @@
     <div class='newsfeed-post-seperator'></div>
 {% endfor %}
 </div>
-{% endwith %}

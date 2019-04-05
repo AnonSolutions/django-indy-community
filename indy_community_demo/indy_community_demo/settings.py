@@ -90,7 +90,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'indy_community.middleware.URLPermissionsMiddleware',
 ]
 
 #AUTHENTICATION_BACKENDS = ['indy_community.indyauth.IndyBackend']
@@ -123,11 +122,6 @@ USER_NAMESPACE = 'individual'
 ORG_NAMESPACE = 'organization'
 
 LOGOUT_REDIRECT_URL = '/'
-URL_NAMESPACE_PATHS = (r'^(/[^/]+)?/(USER_NAMESPACE|ORG_NAMESPACE)($|/.*$)',)
-URL_NAMESPACE_PERMISSIONS = {
-    USER_NAMESPACE: (DEFAULT_USER_ROLE, 'Attendee'),
-    ORG_NAMESPACE: (DEFAULT_ORG_ROLE,),
-}
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
@@ -158,7 +152,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
