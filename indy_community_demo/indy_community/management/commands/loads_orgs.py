@@ -1,6 +1,8 @@
 from django.core.management.base import BaseCommand
+from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth import get_user_model
+
 import yaml
 import os
 
@@ -9,6 +11,22 @@ from indy_community.models import *
 from indy_community.agent_utils import *
 from indy_community.registration_utils import *
 
+
+USER_ROLE = getattr(settings, "DEFAULT_USER_ROLE", 'User')
+ORG_ROLE = getattr(settings, "DEFAULT_ORG_ROLE", 'Admin')
+
+def get_attr_value(key):
+    if isinstance(key, dict):
+        object_type = None
+        object_attrs = {}
+        for attr_attr in key:
+            if attr_attr == 'class':
+                object_type = key['class']
+            else:
+                object_attrs[attr_attr] = key[attr_attr]
+        return get_indy_model(object_type).objects.filter(**object_attrs).get()
+    else:
+        return key
 
 class Command(BaseCommand):
     help = 'Loads Organizations and optionally creates Credential Definitions'
@@ -49,9 +67,21 @@ class Command(BaseCommand):
                 if "$random" in email:
                     email = email.replace("$random", random_alpha_string(12))
 
-                user = get_user_model().objects.create_user(first_name=first_name, last_name=last_name, email=email, password=password)
-                user.groups.add(Group.objects.get(name='Admin'))
+                user_attrs = {}
+                if 'user' in org:
+                    for attr in org['user']:
+                        user_attrs[attr] = get_attr_value(org['user'][attr])
+                user = get_user_model().objects.create_user(first_name=first_name, last_name=last_name, email=email, password=password, **user_attrs)
+                user.groups.add(Group.objects.get(name=ORG_ROLE))
                 user.save()
 
+                org_attrs = {}
+                if 'org' in org:
+                    for attr in org['org']:
+                        org_attrs[attr] = get_attr_value(org['org'][attr])
+                relation_attrs = {}
+                if 'relation' in org:
+                    for attr in org['relation']:
+                        relation_attrs[attr] = get_attr_value(org['relation'][attr])
                 org_role, created = IndyOrgRole.objects.get_or_create(name=role_name)
-                org = org_signup(user, password, name, org_role)
+                org = org_signup(user, password, name, org_attrs=org_attrs, org_relation_attrs=relation_attrs, org_role=org_role)

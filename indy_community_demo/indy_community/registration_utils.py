@@ -1,5 +1,6 @@
 
 from .models import *
+from .utils import *
 from .indy_utils import *
 from .wallet_utils import *
 from .agent_utils import *
@@ -58,16 +59,16 @@ def org_provision(org, raw_password, org_role=None):
     return org
 
 
-def org_signup(user, raw_password, org_name, org_role=None):
+def org_signup(user, raw_password, org_name, org_attrs={}, org_relation_attrs={}, org_role=None):
     """
     Helper method to create and provision a new org, and associate to the current user
     """
-    org = IndyOrganization.objects.create(org_name=org_name, role=org_role)
+    org = get_indy_settings_model('INDY_ORGANIZATION_MODEL').objects.create(org_name=org_name, role=org_role, **org_attrs)
 
     org = org_provision(org, raw_password, org_role)
 
     # associate the user with the org
-    relation = IndyOrgRelationship.objects.create(org=org, user=user)
+    relation = get_indy_settings_model('INDY_ORG_RELATION_MODEL').objects.create(org=org, user=user, **org_relation_attrs)
     relation.save()
 
     return org
