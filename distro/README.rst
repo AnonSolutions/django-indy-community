@@ -6,6 +6,9 @@ Indy Community is a simple Django framework for building
 Hyperledger Indy Agent enabled web applications.
 Detailed documentation is in the "docs" directory.
 
+Please see https://github.com/AnonSolutions/django-indy-community
+
+
 Quick start
 -----------
 
