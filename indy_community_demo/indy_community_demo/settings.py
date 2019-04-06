@@ -135,6 +135,10 @@ DATABASES = {
 
 AUTH_USER_MODEL = 'indy_community.IndyUser'
 
+# override to create app-specific models during data loading
+INDY_ORGANIZATION_MODEL = 'indy_community.IndyOrganization'
+INDY_ORG_RELATION_MODEL = 'indy_community.IndyOrgRelationship'
+
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
 

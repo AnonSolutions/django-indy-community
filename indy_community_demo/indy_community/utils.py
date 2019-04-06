@@ -1,6 +1,43 @@
+from django.apps import apps as django_apps
+from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
+
 import asyncio
 import random
 import string
+
+
+######################################################################
+# Indy model override utilities
+######################################################################
+
+def get_indy_settings_model(model_type):
+    """
+    Return the Indy override model that is active in this project.
+    model_type is 'INDY_ORGANIZATION_MODEL' or 'INDY_ORG_RELATION_MODEL'
+    """
+    try:
+        return django_apps.get_model(getattr(settings, model_type), require_ready=False)
+    except ValueError:
+        raise ImproperlyConfigured("%s must be of the form 'app_label.model_name'" % model_type)
+    except LookupError:
+        raise ImproperlyConfigured(
+            "%s refers to model '%s' that has not been installed" % (model_type, getattr(settings, model_type))
+        )
+
+def get_indy_model(model_type):
+    """
+    Return the Indy override model that is active in this project.
+    model_type is 'INDY_ORGANIZATION_MODEL' or 'INDY_ORG_RELATION_MODEL'
+    """
+    try:
+        return django_apps.get_model(model_type, require_ready=False)
+    except ValueError:
+        raise ImproperlyConfigured("%s must be of the form 'app_label.model_name'" % model_type)
+    except LookupError:
+        raise ImproperlyConfigured(
+            "refers to model '%s' that has not been installed" % model_type
+        )
 
 
 ######################################################################
