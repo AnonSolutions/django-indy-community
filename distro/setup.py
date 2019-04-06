@@ -21,15 +21,13 @@ setup(
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
-        'Framework :: Django :: Hyperledger Indy',  # replace "X.Y" as appropriate
         'Intended Audience :: Developers',
-        'License :: 996.ICU License',  
-        'Operating System :: Ubuntu, Mac OS',
+        'License :: Other/Proprietary License',  
+        'Operating System :: Unix',
+        'Operating System :: MacOS',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Topic :: Internet :: WWW/HTTP',
-        'Topic :: Internet :: WWW/HTTP :: Hyperledger Indy',
-        'Topic :: Internet :: WWW/HTTP :: Self Soverign Identity',
     ],
 )
