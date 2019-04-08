@@ -18,13 +18,14 @@ def url_indy_profile(role):
     else:
         return 'indy/base_individual_profile.html'
 
-def is_organization_login(path):
-    org_url = getattr(settings, 'ORG_NAMESPACE')
+def is_organization_login(user, path):
+    org_url = getattr(settings, 'ORG_NAMESPACE', None)
     if org_url:
         if org_url in path:
             return True
         return False
     if user.has_role(ORG_ROLE):
+        print("User has org role", ORG_ROLE)
         return True
     return False
 
@@ -92,7 +93,7 @@ def handle_wallet_logout_internal(request):
 
 def init_user_session(sender, user, request, **kwargs):
     target = request.POST.get('next', '/profile/')
-    if is_organization_login(target):
+    if is_organization_login(user, target):
         request.session['ACTIVE_ROLE'] = ORG_ROLE
         orgs = IndyOrgRelationship.objects.filter(user=user).all()
         if 0 < len(orgs):

@@ -118,8 +118,6 @@ WSGI_APPLICATION = 'indy_community_demo.wsgi.application'
 
 DEFAULT_USER_ROLE = 'User'
 DEFAULT_ORG_ROLE = 'Admin'
-USER_NAMESPACE = 'individual'
-ORG_NAMESPACE = 'organization'
 
 LOGOUT_REDIRECT_URL = '/'
 
