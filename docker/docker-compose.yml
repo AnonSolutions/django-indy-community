@@ -4,7 +4,7 @@ services:
   # indy-django
   # 
   indy-django:
-    image: anon/indy-base
+    image: anonsolutions/indy-base
     networks:
       - anon
       - von
@@ -33,7 +33,7 @@ services:
   # dummy-cloud-agent
   #
   dummy-cloud-agent:
-    image: anon/indy-base
+    image: anonsolutions/indy-base
     networks:
       - anon
       - von
