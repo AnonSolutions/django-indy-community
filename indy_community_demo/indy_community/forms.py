@@ -12,7 +12,7 @@ from .models import *
 ###############################################################
 
 class UserSignUpForm(UserCreationForm):
-    first_name = forms.CharField(max_length=30, required=False,
+    first_name = forms.CharField(max_length=80, required=False,
                                  help_text='Optional.')
     last_name = forms.CharField(max_length=150, required=False,
                                 help_text='Optional.')
@@ -25,7 +25,7 @@ class UserSignUpForm(UserCreationForm):
 
 
 class OrganizationSignUpForm(UserSignUpForm):
-    org_name = forms.CharField(max_length=40, required=True,
+    org_name = forms.CharField(max_length=60, required=True,
                                  help_text='Required.')
     org_role_name = forms.CharField(max_length=40, required=True,
                                  help_text='Required.')
@@ -35,7 +35,7 @@ class OrganizationSignUpForm(UserSignUpForm):
 # forms to create and confirm agent-to-agent connections
 ######################################################################
 class WalletNameForm(forms.Form):
-    wallet_name = forms.CharField(label='Wallet Name', max_length=30)
+    wallet_name = forms.CharField(label='Wallet Name', max_length=60)
 
     def __init__(self, *args, **kwargs):
         super(WalletNameForm, self).__init__(*args, **kwargs)
@@ -43,7 +43,7 @@ class WalletNameForm(forms.Form):
 
 
 class SendConnectionInvitationForm(WalletNameForm):
-    partner_name = forms.CharField(label='Partner Name', max_length=30)
+    partner_name = forms.CharField(label='Partner Name', max_length=60)
 
     def __init__(self, *args, **kwargs):
         super(SendConnectionInvitationForm, self).__init__(*args, **kwargs)
@@ -106,8 +106,8 @@ class SelectCredentialOfferForm(WalletNameForm):
 
 class SendCredentialOfferForm(WalletNameForm):
     connection_id = forms.IntegerField(label="Connection Id")
-    credential_tag = forms.CharField(label='Credential Tag', max_length=40)
-    credential_name = forms.CharField(label='Credential Name', max_length=40)
+    credential_tag = forms.CharField(label='Credential Tag', max_length=80)
+    credential_name = forms.CharField(label='Credential Name', max_length=80)
     cred_def = forms.CharField(label='Cred Def', max_length=80)
     schema_attrs = forms.CharField(label='Credential Attrs', max_length=4000, widget=forms.Textarea)
 
@@ -120,11 +120,11 @@ class SendCredentialOfferForm(WalletNameForm):
 
 class SendCredentialResponseForm(SendConversationResponseForm):
     # a bunch of fields that are read-only to present to the user
-    from_partner_name = forms.CharField(label='Partner Name', max_length=30)
-    claim_id = forms.CharField(label='Credential Id', max_length=40)
-    claim_name = forms.CharField(label='Credential Name', max_length=40)
+    from_partner_name = forms.CharField(label='Partner Name', max_length=60)
+    claim_id = forms.CharField(label='Credential Id', max_length=80)
+    claim_name = forms.CharField(label='Credential Name', max_length=80)
     credential_attrs = forms.CharField(label='Credential Attrs', max_length=4000, widget=forms.Textarea)
-    libindy_offer_schema_id = forms.CharField(label='Schema Id', max_length=80, widget=forms.Textarea)
+    libindy_offer_schema_id = forms.CharField(label='Schema Id', max_length=120, widget=forms.Textarea)
 
     def __init__(self, *args, **kwargs):
         super(SendCredentialResponseForm, self).__init__(*args, **kwargs)
@@ -150,8 +150,8 @@ class SelectProofRequestForm(WalletNameForm):
 
 class SendProofRequestForm(WalletNameForm):
     connection_id = forms.IntegerField(label="Connection Id")
-    proof_name = forms.CharField(label='Proof Name', max_length=40)
-    proof_uuid = forms.CharField(label='Proof UUID', max_length=40)
+    proof_name = forms.CharField(label='Proof Name', max_length=200)
+    proof_uuid = forms.CharField(label='Proof UUID', max_length=60)
     proof_attrs = forms.CharField(label='Proof Attributes', max_length=4000, widget=forms.Textarea)
     proof_predicates = forms.CharField(label='Proof Predicates', max_length=4000, widget=forms.Textarea)
 
@@ -163,8 +163,8 @@ class SendProofRequestForm(WalletNameForm):
 
 class SendProofReqResponseForm(SendConversationResponseForm):
     # a bunch of fields that are read-only to present to the user
-    from_partner_name = forms.CharField(label='Partner Name', max_length=30)
-    proof_req_name = forms.CharField(label='Proof Request Name', max_length=40)
+    from_partner_name = forms.CharField(label='Partner Name', max_length=60)
+    proof_req_name = forms.CharField(label='Proof Request Name', max_length=200)
     requested_attrs = forms.CharField(label='Requested Attrs', widget=forms.HiddenInput)
 
     def __init__(self, *args, **kwargs):

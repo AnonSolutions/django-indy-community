@@ -1,0 +1,19 @@
+Faber Secondary School:
+  first_name: Faber
+  last_name: School
+  email: faber@mail.com
+  password: pass12345
+  role: School
+Island Health Authority:
+  first_name: Island
+  last_name: Health
+  email: ha@mail.com
+  password: pass12345
+  role: HA
+Island Health Imms Repo:
+  first_name: Immunizations
+  last_name: Repository
+  email: repo@mail.com
+  password: pass12345
+  role: Repository
+
