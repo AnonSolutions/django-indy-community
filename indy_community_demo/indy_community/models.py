@@ -16,7 +16,7 @@ USER_ROLES = (
 
 # base class for Indy wallets
 class IndyWallet(models.Model):
-    wallet_name = models.CharField(max_length=30, unique=True)
+    wallet_name = models.CharField(max_length=60, unique=True)
     wallet_config = models.TextField(max_length=4000, blank=True)
 
     def __str__(self):
@@ -59,7 +59,7 @@ class IndyUser(AbstractBaseUser, PermissionsMixin):
     Simple custom User class with email-based login.
     """
     email = models.EmailField(unique=True)
-    first_name = models.CharField(max_length=30, blank=True)
+    first_name = models.CharField(max_length=80, blank=True)
     last_name = models.CharField(max_length=150, blank=True)
     is_staff = models.BooleanField(
         default=False,
@@ -113,7 +113,7 @@ class IndyOrgRole(models.Model):
 
 # Base class for organizations that use the Indy platform
 class IndyOrganization(models.Model):
-    org_name = models.CharField(max_length=40, unique=True)
+    org_name = models.CharField(max_length=60, unique=True)
     wallet = models.ForeignKey(IndyWallet, to_field="wallet_name", related_name='wallet_org', blank = True, null=True, on_delete=models.CASCADE)
     role = models.ForeignKey(IndyOrgRole, blank = True, null=True, on_delete=models.CASCADE)
 
@@ -132,14 +132,14 @@ class IndyOrgRelationship(models.Model):
 class IndySession(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
-    wallet_name = models.CharField(max_length=30, blank=True, null=True)
+    wallet_name = models.CharField(max_length=60, blank=True, null=True)
 
 
 # reference to a schema on the ledger
 class IndySchema(models.Model):
-    ledger_schema_id = models.CharField(max_length=40, unique=True)
-    schema_name = models.CharField(max_length=40)
-    schema_version = models.CharField(max_length=40)
+    ledger_schema_id = models.CharField(max_length=80, unique=True)
+    schema_name = models.CharField(max_length=80)
+    schema_version = models.CharField(max_length=80)
     schema = models.TextField(max_length=4000)
     schema_template = models.TextField(max_length=4000)
     schema_data = models.TextField(max_length=4000)
@@ -152,11 +152,11 @@ class IndySchema(models.Model):
 
 # reference to a credential definition on the ledger
 class IndyCredentialDefinition(models.Model):
-    ledger_creddef_id = models.CharField(max_length=40, unique=True)
+    ledger_creddef_id = models.CharField(max_length=80, unique=True)
     ledger_schema = models.ForeignKey(IndySchema, on_delete=models.CASCADE)
     wallet = models.ForeignKey(IndyWallet, to_field="wallet_name", related_name='indycreddef_set', on_delete=models.CASCADE)
-    creddef_name = models.CharField(max_length=40)
-    creddef_handle = models.CharField(max_length=40)
+    creddef_name = models.CharField(max_length=80)
+    creddef_handle = models.CharField(max_length=80)
     creddef_template = models.TextField(max_length=4000)
     creddef_data = models.TextField(max_length=4000)
 
@@ -166,7 +166,7 @@ class IndyCredentialDefinition(models.Model):
 
 # Description of a proof request
 class IndyProofRequest(models.Model):
-    proof_req_name = models.CharField(max_length=40, unique=True)
+    proof_req_name = models.CharField(max_length=400, unique=True)
     proof_req_description = models.TextField(max_length=4000)
     proof_req_attrs = models.TextField(max_length=4000)
     proof_req_predicates = models.TextField(max_length=4000, blank=True)
@@ -178,7 +178,7 @@ class IndyProofRequest(models.Model):
 # base class for Agent connections
 class AgentConnection(models.Model):
     wallet = models.ForeignKey(IndyWallet, to_field="wallet_name", on_delete=models.CASCADE)
-    partner_name = models.CharField(max_length=30)
+    partner_name = models.CharField(max_length=60)
     invitation = models.TextField(max_length=4000, blank=True)
     token = models.CharField(max_length=80, blank=True)
     status = models.CharField(max_length=20)
@@ -192,7 +192,7 @@ class AgentConnection(models.Model):
 # base class for Agent conversations - issue/receive credential and request/provide proof
 class AgentConversation(models.Model):
     wallet = models.ForeignKey(IndyWallet, to_field="wallet_name", on_delete=models.CASCADE)
-    connection_partner_name = models.CharField(max_length=30)
+    connection_partner_name = models.CharField(max_length=60)
     conversation_type = models.CharField(max_length=30)
     message_id = models.CharField(max_length=30)
     status = models.CharField(max_length=20)
