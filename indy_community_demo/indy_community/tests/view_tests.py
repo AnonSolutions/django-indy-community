@@ -128,7 +128,7 @@ class IndyViewsTests(TestCase):
         self.assertEqual(1, len(fetch_orgs))
 
         # load schemas and cred defs from yml config
-        config = './myco-schemas.yml'
+        config = './imms-schemas.yml'
         out = StringIO()
         management.call_command('loads_schemas', config, str(fetch_orgs[0].id), stdout=out)
 
@@ -138,7 +138,7 @@ class IndyViewsTests(TestCase):
         self.assertEqual(4, len(proofs))
 
         # load orgs and cred defs from yml config
-        config = './myco-orgs.yml'
+        config = './imms-orgs.yml'
         out = StringIO()
         management.call_command('loads_orgs', config, stdout=out)
 
@@ -151,15 +151,7 @@ class IndyViewsTests(TestCase):
 
         # TODO register a user Alice
 
-        # TODO issue credentials from MYco to Alice
-
-        # TODO issue credential from IRB to Researcher
-
-        # TODO proofs between Alice and Researcher
-
-        # TODO issue consent from Researcher to Alice
-
-        # TODO provide proof and data from Alice to Researcher
+        # TODO issue credentials and proofs ...
 
         # TODO cleanup - delete all wallets
 

@@ -47,7 +47,7 @@ HA Proof of Immunization Consent:
     - {'name':'user_comments'}
 HA Proof of Immunization:
   type: proof_request
-  description: Data revealed by a MYco Client for use in a study
+  description: Data revealed by a parent for immunization status requirements
   revealed_attributes:
     - {'name':'health_id', 'restrictions':[{'issuer_did': '$HA_DID'}]}
     - {'name':'first_name', 'restrictions':[{'issuer_did': '$HA_DID'}]}

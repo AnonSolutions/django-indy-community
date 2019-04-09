@@ -17,11 +17,3 @@ Island Health Imms Repo:
   password: pass12345
   role: Repository
 
-
-{'did': 'KJKW5xiNXeGHLhXeMwH1pk', 'seed': '00000000o_faber_secondary_school', 'verkey': 'AyTPN541YGnfTGh82pGtXD9BB5baTxvYRogJTuaV1kov'}
- >>> Provision an agent and wallet, get back configuration details
-{'did': 'D3JAphtsPrPjA79YuA2dns', 'seed': '0000000o_island_health_authority', 'verkey': '7ZbWonpkGERXKgUpJ6GUCXeyDWjnUPdDiTLU3fHLrerm'}
- >>> Provision an agent and wallet, get back configuration details
-{'did': '8j1DkZ1BC8aRJgQVq5r8ZE', 'seed': '0000000o_island_health_imms_repo', 'verkey': '5DBHR2JGzKZnNWTPtj8iAHKMxJdrZ3ACbGy2eShpkoVN'}
- >>> Provision an agent and wallet, get back configuration details
- 
