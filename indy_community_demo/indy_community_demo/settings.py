@@ -64,6 +64,12 @@ INDY_CONFIG = {
     'ledger_url': 'http://localhost:9000',
 }
 
+INDY_PROFILE_VIEW = 'indy_community.views.profile_view'
+INDY_ORG_DATA_VIEW = 'indy_community.views.data_view'
+INDY_WALLET_VIEW = 'indy_community.views.wallet_view'
+
+INDY_CONVERSATION_CALLBACK = 'indy_community.agent_utils.conversation_callback'
+
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.

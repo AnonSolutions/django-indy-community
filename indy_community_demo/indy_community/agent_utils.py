@@ -572,6 +572,7 @@ def handle_inbound_messages(my_wallet, my_connection):
                                     )
                     new_offer.save()
                     handled_count = handled_count + 1
+                    check_callback(new_offer, None, None)
 
         requests = run_coroutine_with_args(DisclosedProof.get_requests, connection_to_)
         for request in requests:
@@ -589,6 +590,7 @@ def handle_inbound_messages(my_wallet, my_connection):
                                 )
                 new_request.save()
                 handled_count = handled_count + 1
+                check_callback(new_request, None, None)
     except:
         print("Error polling offers and proof requests")
         # TODO ignore polling errors for now ...
@@ -616,6 +618,8 @@ def poll_message_conversation(my_wallet, my_connection, message, initialize_vcx=
         connection = run_coroutine_with_args(Connection.deserialize, json.loads(my_connection.connection_data))
 
         # handle based on message type and status:
+        prev_status = message.status
+        prev_type = message.conversation_type
         if message.conversation_type == 'CredentialOffer':
             # offer sent from issuer to individual
             # de-serialize message content
@@ -691,7 +695,8 @@ def poll_message_conversation(my_wallet, my_connection, message, initialize_vcx=
         else:
             print("Error unknown conversation type", message.message_id, message.conversation_type)
 
-        pass
+        check_callback(message, prev_type, prev_status)
+
     except:
         raise
     finally:
@@ -730,4 +735,26 @@ def poll_message_conversations(my_wallet, my_connection):
             raise
 
     return polled_count
+
+
+######################################################################
+# optional plug-in call-back for new and updated messages
+######################################################################
+
+def conversation_callback(message, prev_type, prev_status):
+    print("message callback", prev_type, prev_status, message.conversation_type, message.status)
+
+
+import importlib
+
+def check_callback(message, prev_type, prev_status):
+    callback_function = getattr(settings, 'INDY_CONVERSATION_CALLBACK', None)
+    if callback_function:
+        print(callback_function)
+
+        mod_name, func_name = callback_function.rsplit('.',1)
+        mod = importlib.import_module(mod_name)
+        func = getattr(mod, func_name)
+
+        func(message, prev_type, prev_status)
 

@@ -113,6 +113,18 @@ def data_view(request):
 def wallet_view(request):
     return render(request, 'indy/wallet.html')
 
+import importlib
+
+def plugin_view(request, view_name):
+    view_function = getattr(settings, view_name)
+    print(view_function)
+
+    mod_name, func_name = view_function.rsplit('.',1)
+    mod = importlib.import_module(mod_name)
+    func = getattr(mod, func_name)
+
+    return func(request)
+
 
 ######################################################################
 # views to create and confirm agent-to-agent connections
