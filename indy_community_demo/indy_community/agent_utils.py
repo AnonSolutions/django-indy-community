@@ -738,11 +738,11 @@ def poll_message_conversations(my_wallet, my_connection):
 
 
 ######################################################################
-# optional plug-in call-back for new and updated messages
+# optional plug-in call-back for new and updated conversations
 ######################################################################
 
-def conversation_callback(message, prev_type, prev_status):
-    print("message callback", prev_type, prev_status, message.conversation_type, message.status)
+def conversation_callback(conversation, prev_type, prev_status):
+    print("conversation callback", prev_type, prev_status, conversations.conversation_type, conversations.status)
 
 
 import importlib
