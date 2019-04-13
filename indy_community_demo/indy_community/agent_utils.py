@@ -118,15 +118,16 @@ def create_schema_json(schema_name, schema_version, schema_attrs):
 
 
 # TODO for now just create a random schema and creddef
-def create_schema(wallet, schema_json, schema_template):
+def create_schema(wallet, schema_json, schema_template, initialize_vcx=True):
     """
     Create a schema (VCX) and also store in our local database
     """
-    try:
-        config_json = wallet.wallet_config
-        run_coroutine_with_args(vcx_init_with_config, config_json)
-    except:
-        raise
+    if initialize_vcx:
+        try:
+            config_json = wallet.wallet_config
+            run_coroutine_with_args(vcx_init_with_config, config_json)
+        except:
+            raise
 
     try:
         schema = json.loads(schema_json)
@@ -147,25 +148,27 @@ def create_schema(wallet, schema_json, schema_template):
     except:
         raise
     finally:
-        try:
-            shutdown(False)
-        except:
-            raise
+        if initialize_vcx:
+            try:
+                shutdown(False)
+            except:
+                raise
 
     return indy_schema
 
 
 # TODO for now just create a random schema and creddef
-def create_creddef(wallet, indy_schema, creddef_name, creddef_template):
+def create_creddef(wallet, indy_schema, creddef_name, creddef_template, initialize_vcx=True):
     """
     Create a credential definition (VCX) and also store in our local database
     """
     # wallet specific-configuration for creatig the cred def
-    try:
-        config_json = wallet.wallet_config
-        run_coroutine_with_args(vcx_init_with_config, config_json)
-    except:
-        raise
+    if initialize_vcx:
+        try:
+            config_json = wallet.wallet_config
+            run_coroutine_with_args(vcx_init_with_config, config_json)
+        except:
+            raise
 
     try:
         cred_def = run_coroutine_with_args(CredentialDef.create, 'credef_uuid', creddef_name, indy_schema.ledger_schema_id, 0)
@@ -187,10 +190,11 @@ def create_creddef(wallet, indy_schema, creddef_name, creddef_template):
     except:
         raise
     finally:
-        try:
-            shutdown(False)
-        except:
-            raise
+        if initialize_vcx:
+            try:
+                shutdown(False)
+            except:
+                raise
 
     return indy_creddef
 
@@ -216,12 +220,13 @@ def create_proof_request(name, description, attrs, predicates):
 # utilities to create and confirm agent-to-agent connections
 ######################################################################
 
-def send_connection_invitation(wallet, partner_name):
-    try:
-        config_json = wallet.wallet_config
-        run_coroutine_with_args(vcx_init_with_config, config_json)
-    except:
-        raise
+def send_connection_invitation(wallet, partner_name, initialize_vcx=True):
+    if initialize_vcx:
+        try:
+            config_json = wallet.wallet_config
+            run_coroutine_with_args(vcx_init_with_config, config_json)
+        except:
+            raise
 
     # create connection and generate invitation
     try:
@@ -246,20 +251,22 @@ def send_connection_invitation(wallet, partner_name):
     except:
         raise
     finally:
-        try:
-            shutdown(False)
-        except:
-            raise
+        if initialize_vcx:
+            try:
+                shutdown(False)
+            except:
+                raise
 
     return connection
 
 
-def send_connection_confirmation(wallet, partner_name, invite_details):
-    try:
-        config_json = wallet.wallet_config
-        run_coroutine_with_args(vcx_init_with_config, config_json)
-    except:
-        raise
+def send_connection_confirmation(wallet, partner_name, invite_details, initialize_vcx=True):
+    if initialize_vcx:
+        try:
+            config_json = wallet.wallet_config
+            run_coroutine_with_args(vcx_init_with_config, config_json)
+        except:
+            raise
 
     # create connection and generate invitation
     try:
@@ -288,20 +295,22 @@ def send_connection_confirmation(wallet, partner_name, invite_details):
     except:
         raise
     finally:
-        try:
-            shutdown(False)
-        except:
-            raise
+        if initialize_vcx:
+            try:
+                shutdown(False)
+            except:
+                raise
 
     return connection
 
 
-def check_connection_status(wallet, connection):
-    try:
-        config_json = wallet.wallet_config
-        run_coroutine_with_args(vcx_init_with_config, config_json)
-    except:
-        raise
+def check_connection_status(wallet, connection, initialize_vcx=True):
+    if initialize_vcx:
+        try:
+            config_json = wallet.wallet_config
+            run_coroutine_with_args(vcx_init_with_config, config_json)
+        except:
+            raise
 
     # create connection and check status
     try:
@@ -325,10 +334,11 @@ def check_connection_status(wallet, connection):
     except:
         raise
     finally:
-        try:
-            shutdown(False)
-        except:
-            raise
+        if initialize_vcx:
+            try:
+                shutdown(False)
+            except:
+                raise
 
     return my_connection
 
@@ -337,12 +347,13 @@ def check_connection_status(wallet, connection):
 # utilities to offer, request, send and receive credentials
 ######################################################################
 
-def send_credential_offer(wallet, connection, credential_tag, schema_attrs, cred_def, credential_name):
-    try:
-        config_json = wallet.wallet_config
-        run_coroutine_with_args(vcx_init_with_config, config_json)
-    except:
-        raise
+def send_credential_offer(wallet, connection, credential_tag, schema_attrs, cred_def, credential_name, initialize_vcx=True):
+    if initialize_vcx:
+        try:
+            config_json = wallet.wallet_config
+            run_coroutine_with_args(vcx_init_with_config, config_json)
+        except:
+            raise
 
     # create connection and generate invitation
     try:
@@ -368,20 +379,22 @@ def send_credential_offer(wallet, connection, credential_tag, schema_attrs, cred
     except:
         raise
     finally:
-        try:
-            shutdown(False)
-        except:
-            raise
+        if initialize_vcx:
+            try:
+                shutdown(False)
+            except:
+                raise
 
     return conversation
     
 
-def send_credential_request(wallet, connection, conversation):
-    try:
-        config_json = wallet.wallet_config
-        run_coroutine_with_args(vcx_init_with_config, config_json)
-    except:
-        raise
+def send_credential_request(wallet, connection, conversation, initialize_vcx=True):
+    if initialize_vcx:
+        try:
+            config_json = wallet.wallet_config
+            run_coroutine_with_args(vcx_init_with_config, config_json)
+        except:
+            raise
 
     # create connection and generate invitation
     try:
@@ -403,10 +416,11 @@ def send_credential_request(wallet, connection, conversation):
     except:
         raise
     finally:
-        try:
-            shutdown(False)
-        except:
-            raise
+        if initialize_vcx:
+            try:
+                shutdown(False)
+            except:
+                raise
 
     return conversation
 
@@ -415,12 +429,13 @@ def send_credential_request(wallet, connection, conversation):
 # utilities to request, send and receive proofs
 ######################################################################
 
-def send_proof_request(wallet, connection, proof_uuid, proof_name, proof_attrs, proof_predicates):
-    try:
-        config_json = wallet.wallet_config
-        run_coroutine_with_args(vcx_init_with_config, config_json)
-    except:
-        raise
+def send_proof_request(wallet, connection, proof_uuid, proof_name, proof_attrs, proof_predicates, initialize_vcx=True):
+    if initialize_vcx:
+        try:
+            config_json = wallet.wallet_config
+            run_coroutine_with_args(vcx_init_with_config, config_json)
+        except:
+            raise
 
     # create connection and generate invitation
     try:
@@ -446,20 +461,22 @@ def send_proof_request(wallet, connection, proof_uuid, proof_name, proof_attrs, 
     except:
         raise
     finally:
-        try:
-            shutdown(False)
-        except:
-            raise
+        if initialize_vcx:
+            try:
+                shutdown(False)
+            except:
+                raise
 
     return conversation
 
 
-def get_claims_for_proof_request(wallet, connection, my_conversation):
-    try:
-        config_json = wallet.wallet_config
-        run_coroutine_with_args(vcx_init_with_config, config_json)
-    except:
-        raise
+def get_claims_for_proof_request(wallet, connection, my_conversation, initialize_vcx=True):
+    if initialize_vcx:
+        try:
+            config_json = wallet.wallet_config
+            run_coroutine_with_args(vcx_init_with_config, config_json)
+        except:
+            raise
 
     # create connection and generate invitation
     try:
@@ -472,10 +489,11 @@ def get_claims_for_proof_request(wallet, connection, my_conversation):
     except:
         raise
     finally:
-        try:
-            shutdown(False)
-        except:
-            raise
+        if initialize_vcx:
+            try:
+                shutdown(False)
+            except:
+                raise
 
     return creds_for_proof
 
@@ -486,12 +504,13 @@ def cred_for_referent(creds_for_proof, attr, schema_id):
             return cred
     return None
 
-def send_claims_for_proof_request(wallet, connection, my_conversation, credential_attrs):
-    try:
-        config_json = wallet.wallet_config
-        run_coroutine_with_args(vcx_init_with_config, config_json)
-    except:
-        raise
+def send_claims_for_proof_request(wallet, connection, my_conversation, credential_attrs, initialize_vcx=True):
+    if initialize_vcx:
+        try:
+            config_json = wallet.wallet_config
+            run_coroutine_with_args(vcx_init_with_config, config_json)
+        except:
+            raise
 
     # create connection and generate invitation
     try:
@@ -529,10 +548,11 @@ def send_claims_for_proof_request(wallet, connection, my_conversation, credentia
     except:
         raise
     finally:
-        try:
-            shutdown(False)
-        except:
-            raise
+        if initialize_vcx:
+            try:
+                shutdown(False)
+            except:
+                raise
 
     return proof_data
 
