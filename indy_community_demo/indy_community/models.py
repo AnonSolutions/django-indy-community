@@ -199,4 +199,4 @@ class AgentConversation(models.Model):
     conversation_data = models.TextField(max_length=4000, blank=True)
 
     def __str__(self):
-        return self.wallet.wallet_name + ":" + self.connection.partner_name + ":" + self.message_id + ", " +  self.conversation_type + " " + self.status
+        return self.connection.wallet.wallet_name + ":" + self.connection.partner_name + ":" + self.message_id + ", " +  self.conversation_type + " " + self.status
