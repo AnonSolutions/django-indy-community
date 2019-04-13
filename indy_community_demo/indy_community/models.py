@@ -178,7 +178,7 @@ class IndyProofRequest(models.Model):
 # base class for Agent connections
 class AgentConnection(models.Model):
     wallet = models.ForeignKey(IndyWallet, to_field="wallet_name", on_delete=models.CASCADE)
-    partner_name = models.CharField(max_length=60, unique=True)
+    partner_name = models.CharField(max_length=60)
     invitation = models.TextField(max_length=4000, blank=True)
     token = models.CharField(max_length=80, blank=True)
     status = models.CharField(max_length=20)
@@ -191,7 +191,7 @@ class AgentConnection(models.Model):
 
 # base class for Agent conversations - issue/receive credential and request/provide proof
 class AgentConversation(models.Model):
-    connection = models.ForeignKey(AgentConnection, to_field="partner_name", on_delete=models.CASCADE)
+    connection = models.ForeignKey(AgentConnection, on_delete=models.CASCADE)
     conversation_type = models.CharField(max_length=30)
     message_id = models.CharField(max_length=30)
     status = models.CharField(max_length=20)
