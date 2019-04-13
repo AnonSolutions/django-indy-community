@@ -359,8 +359,7 @@ def send_credential_offer(wallet, connection, credential_tag, schema_attrs, cred
         credential_data = run_coroutine(credential.serialize)
 
         conversation = AgentConversation(
-            wallet = wallet,
-            connection_partner_name = connection.partner_name,
+            connection = connection,
             conversation_type = 'CredentialOffer',
             message_id = 'N/A',
             status = 'Sent',
@@ -438,8 +437,7 @@ def send_proof_request(wallet, connection, proof_uuid, proof_name, proof_attrs, 
         proof_data = run_coroutine(proof.serialize)
 
         conversation = AgentConversation(
-            wallet = wallet,
-            connection_partner_name = connection.partner_name,
+            connection = connection,
             conversation_type = 'ProofRequest',
             message_id = 'N/A',
             status = 'Sent',
@@ -563,8 +561,7 @@ def handle_inbound_messages(my_wallet, my_connection):
                     save_offer = offer[0].copy()
                     offer_data = json.dumps(save_offer)
                     new_offer = AgentConversation(
-                                        wallet = my_wallet,
-                                        connection_partner_name = my_connection.partner_name,
+                                        connection = my_connection,
                                         conversation_type = "CredentialOffer",
                                         message_id = save_offer['msg_ref_id'],
                                         status = 'Pending',
@@ -581,8 +578,7 @@ def handle_inbound_messages(my_wallet, my_connection):
                 save_request = request.copy()
                 request_data = json.dumps(save_request)
                 new_request = AgentConversation(
-                                    wallet = my_wallet,
-                                    connection_partner_name = my_connection.partner_name,
+                                    connection = my_connection,
                                     conversation_type = "ProofRequest",
                                     message_id = save_request['msg_ref_id'],
                                     status = 'Pending',
@@ -720,7 +716,7 @@ def poll_message_conversations(my_wallet, my_connection):
         polled_count = 0
 
         # Any conversations of status 'Sent' are for bot processing ...
-        messages = AgentConversation.objects.filter(wallet=my_wallet, connection_partner_name=my_connection.partner_name, status='Sent')
+        messages = AgentConversation.objects.filter(connection__wallet=my_wallet, connection=my_connection, status='Sent')
 
         for message in messages:
             message = poll_message_conversation(my_wallet, my_connection, message, initialize_vcx=False)
@@ -742,7 +738,7 @@ def poll_message_conversations(my_wallet, my_connection):
 ######################################################################
 
 def conversation_callback(conversation, prev_type, prev_status):
-    print("conversation callback", prev_type, prev_status, conversations.conversation_type, conversations.status)
+    print("conversation callback", prev_type, prev_status, conversation.conversation_type, conversation.status)
 
 
 import importlib

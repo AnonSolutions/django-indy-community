@@ -240,9 +240,18 @@ class AgentConversationTests(TestCase):
             wallet_config='{"some":"test", "string":"."}',
         )
         wallet.save()
-        conversation = AgentConversation.objects.create(
+        connection = AgentConnection.objects.create(
             wallet=wallet,
-            connection_partner_name='partner',
+            partner_name='partner',
+            invitation='invitation to connect',
+            token='token to identify connection',
+            status='Active',
+            connection_type='In or Out',
+            connection_data='data representing connection state',
+        )
+        connection.save()
+        conversation = AgentConversation.objects.create(
+            connection=connection,
             conversation_type='proof or credential',
             message_id='123',
             status='Active',
@@ -251,7 +260,7 @@ class AgentConversationTests(TestCase):
         )
         conversation.save()
 
-        fetch_conversation = AgentConversation.objects.filter(wallet=wallet, connection_partner_name='partner', message_id='123').all()
+        fetch_conversation = AgentConversation.objects.filter(connection__wallet=wallet, connection=connection, message_id='123').all()
         self.assertEqual(len(fetch_conversation), 1)
         self.assertEqual(fetch_conversation[0].conversation_data, 'data representing conversation state')
 
