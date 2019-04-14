@@ -164,7 +164,7 @@ class SendProofRequestForm(WalletNameForm):
 class SendProofReqResponseForm(SendConversationResponseForm):
     # a bunch of fields that are read-only to present to the user
     from_partner_name = forms.CharField(label='Partner Name', max_length=60)
-    proof_req_name = forms.CharField(label='Proof Request Name', max_length=200)
+    proof_req_name = forms.CharField(label='Proof Request Name', max_length=400)
     # TODO not sure if this element is required on this form ...
     requested_attrs = forms.CharField(label='Requested Attrs', widget=forms.HiddenInput)
 

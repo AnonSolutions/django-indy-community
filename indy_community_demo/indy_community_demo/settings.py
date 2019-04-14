@@ -69,6 +69,7 @@ INDY_ORG_DATA_VIEW = 'indy_community.views.data_view'
 INDY_WALLET_VIEW = 'indy_community.views.wallet_view'
 
 INDY_CONVERSATION_CALLBACK = 'indy_community.agent_utils.conversation_callback'
+INDY_CONNECTION_CALLBACK = 'indy_community.agent_utils.connection_callback'
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,

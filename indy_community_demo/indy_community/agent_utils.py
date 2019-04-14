@@ -292,6 +292,8 @@ def send_connection_confirmation(wallet, partner_name, invite_details, initializ
                 connection_data = json.dumps(connection_data),
                 status = 'Active')
         connection.save()
+
+        check_connection_callback(connection, None)
     except:
         raise
     finally:
@@ -314,6 +316,7 @@ def check_connection_status(wallet, connection, initialize_vcx=True):
 
     # create connection and check status
     try:
+        prev_status = connection.status
         connection_to_ = run_coroutine_with_args(Connection.deserialize, json.loads(connection.connection_data))
         run_coroutine(connection_to_.update_state)
         connection_state = run_coroutine(connection_to_.get_state)
@@ -331,6 +334,8 @@ def check_connection_status(wallet, connection, initialize_vcx=True):
         my_connection.connection_data = json.dumps(connection_data)
         my_connection.status = return_state
         my_connection.save()
+
+        check_connection_callback(connection, prev_status)
     except:
         raise
     finally:
@@ -589,7 +594,7 @@ def handle_inbound_messages(my_wallet, my_connection):
                                     )
                     new_offer.save()
                     handled_count = handled_count + 1
-                    check_callback(new_offer, None, None)
+                    check_conversation_callback(new_offer, None, None)
 
         requests = run_coroutine_with_args(DisclosedProof.get_requests, connection_to_)
         for request in requests:
@@ -606,7 +611,7 @@ def handle_inbound_messages(my_wallet, my_connection):
                                 )
                 new_request.save()
                 handled_count = handled_count + 1
-                check_callback(new_request, None, None)
+                check_conversation_callback(new_request, None, None)
     except:
         print("Error polling offers and proof requests")
         # TODO ignore polling errors for now ...
@@ -711,7 +716,7 @@ def poll_message_conversation(my_wallet, my_connection, message, initialize_vcx=
         else:
             print("Error unknown conversation type", message.message_id, message.conversation_type)
 
-        check_callback(message, prev_type, prev_status)
+        check_conversation_callback(message, prev_type, prev_status)
 
     except:
         raise
@@ -760,17 +765,27 @@ def poll_message_conversations(my_wallet, my_connection):
 def conversation_callback(conversation, prev_type, prev_status):
     print("conversation callback", prev_type, prev_status, conversation.conversation_type, conversation.status)
 
+def connection_callback(connection, prev_status):
+    print("connection callback", prev_status, connection.status)
+
 
 import importlib
 
-def check_callback(message, prev_type, prev_status):
+def check_conversation_callback(message, prev_type, prev_status):
     callback_function = getattr(settings, 'INDY_CONVERSATION_CALLBACK', None)
     if callback_function:
-        print(callback_function)
-
         mod_name, func_name = callback_function.rsplit('.',1)
         mod = importlib.import_module(mod_name)
         func = getattr(mod, func_name)
 
         func(message, prev_type, prev_status)
+
+def check_connection_callback(connection, prev_status):
+    callback_function = getattr(settings, 'INDY_CONNECTION_CALLBACK', None)
+    if callback_function:
+        mod_name, func_name = callback_function.rsplit('.',1)
+        mod = importlib.import_module(mod_name)
+        func = getattr(mod, func_name)
+
+        func(connection, prev_status)
 
