@@ -165,16 +165,19 @@ class SendProofReqResponseForm(SendConversationResponseForm):
     # a bunch of fields that are read-only to present to the user
     from_partner_name = forms.CharField(label='Partner Name', max_length=60)
     proof_req_name = forms.CharField(label='Proof Request Name', max_length=200)
+    # TODO not sure if this element is required on this form ...
     requested_attrs = forms.CharField(label='Requested Attrs', widget=forms.HiddenInput)
 
     def __init__(self, *args, **kwargs):
         super(SendProofReqResponseForm, self).__init__(*args, **kwargs)
         self.fields['from_partner_name'].widget.attrs['readonly'] = True
         self.fields['proof_req_name'].widget.attrs['readonly'] = True
+        # TODO not sure if this element is required on this form ...
         self.fields['requested_attrs'].widget.attrs['readonly'] = True
 
 
 class SelectProofReqClaimsForm(SendProofReqResponseForm):
+    # TODO maybe move requested_attrs to this form (?)
 
     def __init__(self, *args, **kwargs):
         super(SelectProofReqClaimsForm, self).__init__(*args, **kwargs)
