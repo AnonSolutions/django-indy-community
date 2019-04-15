@@ -208,7 +208,7 @@ def handle_connection_response(request):
 
             # build the connection and get the invitation data back
             try:
-                my_connection = send_connection_confirmation(wallet, partner_name, invitation_details)
+                my_connection = send_connection_confirmation(wallet, connection_id, partner_name, invitation_details)
 
                 return render(request, 'indy/form_response.html', {'msg': 'Updated connection for ' + wallet.wallet_name})
             except IndyError:

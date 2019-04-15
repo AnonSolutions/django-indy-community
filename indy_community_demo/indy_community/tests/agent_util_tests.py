@@ -42,7 +42,7 @@ class AgentInteractionTests(TestCase):
         sleep(1)
 
         # accept connection request (user -> org)
-        user_connection = send_connection_confirmation(user.wallet, org.org_name, org_connection_1.invitation)
+        user_connection = send_connection_confirmation(user.wallet, org_connection_1.id, org.org_name, org_connection_1.invitation)
         sleep(1)
 
         # update connection status (org)

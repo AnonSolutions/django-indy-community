@@ -260,7 +260,7 @@ def send_connection_invitation(wallet, partner_name, initialize_vcx=True):
     return connection
 
 
-def send_connection_confirmation(wallet, partner_name, invite_details, initialize_vcx=True):
+def send_connection_confirmation(wallet, connection_id, partner_name, invite_details, initialize_vcx=True):
     if initialize_vcx:
         try:
             config_json = wallet.wallet_config
@@ -278,7 +278,7 @@ def send_connection_confirmation(wallet, partner_name, invite_details, initializ
         connection_from_.release()
         connection_from_ = None
 
-        connections = AgentConnection.objects.filter(wallet=wallet, partner_name=partner_name).all()
+        connections = AgentConnection.objects.filter(wallet=wallet, id=connection_id, partner_name=partner_name).all()
         if 0 < len(connections):
             connection = connections[0]
             connection.connection_data = json.dumps(connection_data)
