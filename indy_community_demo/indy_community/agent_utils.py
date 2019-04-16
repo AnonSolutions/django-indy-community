@@ -559,7 +559,7 @@ def send_claims_for_proof_request(wallet, connection, my_conversation, credentia
             except:
                 raise
 
-    return proof_data
+    return my_conversation
 
 
 ######################################################################

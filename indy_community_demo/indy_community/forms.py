@@ -150,7 +150,7 @@ class SelectProofRequestForm(WalletNameForm):
 
 class SendProofRequestForm(WalletNameForm):
     connection_id = forms.IntegerField(label="Connection Id")
-    proof_name = forms.CharField(label='Proof Name', max_length=200)
+    proof_name = forms.CharField(label='Proof Name', max_length=400)
     proof_uuid = forms.CharField(label='Proof UUID', max_length=60)
     proof_attrs = forms.CharField(label='Proof Attributes', max_length=4000, widget=forms.Textarea)
     proof_predicates = forms.CharField(label='Proof Predicates', max_length=4000, widget=forms.Textarea)
