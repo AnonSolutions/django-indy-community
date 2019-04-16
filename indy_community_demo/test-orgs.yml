@@ -1,0 +1,25 @@
+Faber College:
+  first_name: Faber
+  last_name: College
+  email: faber@mail.com
+  password: pass12345
+  role: School
+Acme Inc:
+  first_name: Acme
+  last_name: Inc
+  email: acme@mail.com
+  password: pass12345
+  role: Employer
+Thrift Bank:
+  first_name: Thrift
+  last_name: Bank
+  email: thrift@mail.com
+  password: pass12345
+  role: Bank
+Province of BC:
+  first_name: British
+  last_name: Columbia
+  email: bc@mail.com
+  password: pass12345
+  role: Goverment
+
