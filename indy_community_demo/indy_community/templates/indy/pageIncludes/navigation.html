@@ -49,7 +49,7 @@
 			<div class='sidenav-con sidenav-bottom'>
 				<ul>
 					<li>TBD</li>
-					<li><a href="{% url 'logout' %}">{% trans "Log Out" %}</a></li>
+					<li><a href="{% url 'logout' %}?next={% url 'login' %}">{% trans "Log Out" %}</a></li>
 				</ul>
 			</div>
 		</div> <!-- side nav ends -->

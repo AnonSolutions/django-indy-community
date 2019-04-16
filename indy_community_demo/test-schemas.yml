@@ -2,20 +2,20 @@ Transcript:
   type: schema
   version: $generate
   issuing_roles:
-    - Test
+    - School
   attributes:
     - first_name
     - last_name
     - degree
     - status
-    - date
+    - year
     - average
     - ssn
 Job Certificate:
   type: schema
   version: $generate
   issuing_roles:
-    - Test
+    - Employer
   attributes:
     - first_name
     - last_name
@@ -27,7 +27,7 @@ Drivers License:
   type: schema
   version: $generate
   issuing_roles:
-    - Test
+    - Goverment
   attributes:
     - last_name
     - first_name
@@ -48,7 +48,7 @@ Passport:
   type: schema
   version: $generate
   issuing_roles:
-    - Test
+    - Goverment
   attributes:
     - last_name
     - first_name
@@ -63,6 +63,26 @@ Passport:
     - age
     - issuing_country
     - issuing_authority
+Proof of Education:
+  type: proof_request
+  description: Proof of Education for Employment Application
+  revealed_attributes:
+    - {'name':'first_name'}
+    - {'name':'last_name'},
+    - {'name':'degree', 'restrictions': [{'cred_def_id': $CRED_DEF_ID}]}
+    - {'name':'status','restrictions': [{'cred_def_id': $CRED_DEF_ID}]}
+    - {'name':'ssn', 'restrictions': [{'cred_def_id': $CRED_DEF_ID}]}
+    - {'name':'phone_number'}
+  predicates:
+    - {'name': 'average','p_type': '>=','p_value': '$VALUE', 'restrictions':[{'issuer_did': '$ISSUER_DID'}]}
+Proof of Employment:
+  type: proof_request
+  description: Proof of Employment and Earning
+  revealed_attributes:
+    - {'name':'employee_status', 'restrictions': [{'cred_def_id': $CRED_DEF_ID}]}
+  predicates:
+    - {'name': 'salary','p_type': '>=','p_value': '$VALUE', 'restrictions':[{'issuer_did': '$ISSUER_DID'}]}
+    - {'name': 'experience','p_type': '>=','p_value': '$VALUE', 'restrictions':[{'issuer_did': '$ISSUER_DID'}]}
 Proof of Age:
   type: proof_request
   description: Proof of Age

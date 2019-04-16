@@ -4,6 +4,5 @@ include requirements.txt
 include requirements-docker.txt
 include requirements-local.txt
 recursive-include requirements *
-recursive-include indy_community/static *
 recursive-include indy_community/templates *
 recursive-include docs *

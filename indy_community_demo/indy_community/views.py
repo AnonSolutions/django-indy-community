@@ -113,6 +113,18 @@ def data_view(request):
 def wallet_view(request):
     return render(request, 'indy/wallet.html')
 
+import importlib
+
+def plugin_view(request, view_name):
+    view_function = getattr(settings, view_name)
+    print(view_function)
+
+    mod_name, func_name = view_function.rsplit('.',1)
+    mod = importlib.import_module(mod_name)
+    func = getattr(mod, func_name)
+
+    return func(request)
+
 
 ######################################################################
 # views to create and confirm agent-to-agent connections
@@ -196,7 +208,7 @@ def handle_connection_response(request):
 
             # build the connection and get the invitation data back
             try:
-                my_connection = send_connection_confirmation(wallet, partner_name, invitation_details)
+                my_connection = send_connection_confirmation(wallet, connection_id, partner_name, invitation_details)
 
                 return render(request, 'indy/form_response.html', {'msg': 'Updated connection for ' + wallet.wallet_name})
             except IndyError:
@@ -312,7 +324,7 @@ def check_connection_messages(request):
 def list_conversations(request):
     # expects a wallet to be opened in the current session
     wallet = wallet_for_current_session(request)
-    conversations = AgentConversation.objects.filter(wallet=wallet).all()
+    conversations = AgentConversation.objects.filter(connection__wallet=wallet).all()
     return render(request, 'indy/conversation/list.html', {'wallet_name': wallet.wallet_name, 'conversations': conversations})
 
 
@@ -402,12 +414,10 @@ def handle_cred_offer_response(request):
             wallet = wallet_for_current_session(request)
     
             # find conversation request
-            conversations = AgentConversation.objects.filter(id=conversation_id, wallet=wallet).all()
-            # TODO validate conversation id
+            conversations = AgentConversation.objects.filter(id=conversation_id, connection__wallet=wallet).all()
             my_conversation = conversations[0]
-            connections = AgentConnection.objects.filter(wallet=my_conversation.wallet, partner_name=my_conversation.connection_partner_name).all()
-            # TODO validate connection id
-            my_connection = connections[0]
+            # TODO validate conversation id
+            my_connection = my_conversation.connection
 
             # build the credential request and send
             try:
@@ -423,13 +433,12 @@ def handle_cred_offer_response(request):
         # find conversation request, fill in form details
         conversation_id = request.GET.get('conversation_id', None)
         wallet = wallet_for_current_session(request)
-        conversations = AgentConversation.objects.filter(id=conversation_id, wallet=wallet).all()
+        conversations = AgentConversation.objects.filter(id=conversation_id, connection__wallet=wallet).all()
         # TODO validate conversation id
         conversation = conversations[0]
         indy_conversation = json.loads(conversation.conversation_data)
-        connections = AgentConnection.objects.filter(wallet=conversation.wallet, partner_name=conversation.connection_partner_name).all()
         # TODO validate connection id
-        connection = connections[0]
+        connection = conversation.connection
         form = SendCredentialResponseForm(initial={ 
                                                  'conversation_id': conversation_id,
                                                  'wallet_name': connection.wallet.wallet_name,
@@ -459,12 +468,11 @@ def handle_proof_req_response(request):
             wallet = wallet_for_current_session(request)
     
             # find conversation request
-            conversations = AgentConversation.objects.filter(id=conversation_id, wallet=wallet).all()
-            # TODO validate conversation id
+            conversations = AgentConversation.objects.filter(id=conversation_id, connection__wallet=wallet).all()
             my_conversation = conversations[0]
-            connections = AgentConnection.objects.filter(wallet=my_conversation.wallet, partner_name=my_conversation.connection_partner_name).all()
+            # TODO validate conversation id
             # TODO validate connection id
-            my_connection = connections[0]
+            my_connection = my_conversation.connection
 
             # find claims for this proof request and display for the user
             try:
@@ -488,13 +496,12 @@ def handle_proof_req_response(request):
         # find conversation request, fill in form details
         wallet = wallet_for_current_session(request)
         conversation_id = request.GET.get('conversation_id', None)
-        conversations = AgentConversation.objects.filter(id=conversation_id, wallet=wallet).all()
+        conversations = AgentConversation.objects.filter(id=conversation_id, connection__wallet=wallet).all()
         # TODO validate conversation id
         conversation = conversations[0]
         indy_conversation = json.loads(conversation.conversation_data)
-        connections = AgentConnection.objects.filter(wallet=wallet, partner_name=conversation.connection_partner_name).all()
         # TODO validate connection id
-        connection = connections[0]
+        connection = conversation.connection
         form = SendProofReqResponseForm(initial={ 
                                                  'conversation_id': conversation_id,
                                                  'wallet_name': connection.wallet.wallet_name,
@@ -519,13 +526,12 @@ def handle_proof_select_claims(request):
             wallet = wallet_for_current_session(request)
 
             # find conversation request
-            conversations = AgentConversation.objects.filter(id=conversation_id, wallet=wallet).all()
+            conversations = AgentConversation.objects.filter(id=conversation_id, connection__wallet=wallet).all()
             # TODO validate conversation id
             my_conversation = conversations[0]
             indy_conversation = json.loads(my_conversation.conversation_data)
-            connections = AgentConnection.objects.filter(wallet=wallet, partner_name=my_conversation.connection_partner_name).all()
             # TODO validate connection id
-            my_connection = connections[0]
+            my_connection = my_conversation.connection
 
             # get selected attributes for proof request
             print("Map requested attributes")
@@ -573,13 +579,12 @@ def poll_conversation_status(request):
             wallet = wallet_for_current_session(request)
     
             # find conversation request
-            conversations = AgentConversation.objects.filter(id=conversation_id, wallet=wallet).all()
+            conversations = AgentConversation.objects.filter(id=conversation_id, connection__wallet=wallet).all()
             # TODO validate conversation id
             my_conversation = conversations[0]
             indy_conversation = json.loads(my_conversation.conversation_data)
-            connections = AgentConnection.objects.filter(wallet=wallet, partner_name=my_conversation.connection_partner_name).all()
             # TODO validate connection id
-            my_connection = connections[0]
+            my_connection = my_conversation.connection
 
             # check conversation status
             try:
@@ -595,13 +600,12 @@ def poll_conversation_status(request):
         # find conversation request, fill in form details
         wallet = wallet_for_current_session(request)
         conversation_id = request.GET.get('conversation_id', None)
-        conversations = AgentConversation.objects.filter(id=conversation_id, wallet=wallet).all()
+        conversations = AgentConversation.objects.filter(id=conversation_id, connection__wallet=wallet).all()
         # TODO validate conversation id
         conversation = conversations[0]
         indy_conversation = json.loads(conversation.conversation_data)
-        connections = AgentConnection.objects.filter(wallet=wallet, partner_name=conversation.connection_partner_name).all()
         # TODO validate connection id
-        connection = connections[0]
+        connection = conversation.connection
         form = SendConversationResponseForm(initial={'conversation_id': conversation_id, 'wallet_name': connection.wallet.wallet_name})
 
     return render(request, 'indy/conversation/status.html', {'form': form})
@@ -691,7 +695,7 @@ def handle_send_proof_request(request):
 def handle_view_proof(request):
     wallet = wallet_for_current_session(request)
     conversation_id = request.GET.get('conversation_id', None)
-    conversations = AgentConversation.objects.filter(id=conversation_id, wallet=wallet).all()
+    conversations = AgentConversation.objects.filter(id=conversation_id, connection__wallet=wallet).all()
     # TODO validate conversation id
     conversation = conversations[0]
     return render(request, 'indy/form_response.html', {'msg': "Proof Reveived", 'msg_txt': conversation.conversation_data})

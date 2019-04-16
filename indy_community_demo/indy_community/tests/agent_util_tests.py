@@ -42,7 +42,7 @@ class AgentInteractionTests(TestCase):
         sleep(1)
 
         # accept connection request (user -> org)
-        user_connection = send_connection_confirmation(user.wallet, org.org_name, org_connection_1.invitation)
+        user_connection = send_connection_confirmation(user.wallet, org_connection_1.id, org.org_name, org_connection_1.invitation)
         sleep(1)
 
         # update connection status (org)
@@ -94,7 +94,7 @@ class AgentInteractionTests(TestCase):
             if handled_count > 0 or i > 3:
                 break
             sleep(2)
-        user_conversations = AgentConversation.objects.filter(wallet=user.wallet, conversation_type="CredentialOffer", status='Pending').all()
+        user_conversations = AgentConversation.objects.filter(connection__wallet=user.wallet, conversation_type="CredentialOffer", status='Pending').all()
         user_conversation_1 = user_conversations[0]
 
         # send credential request (user -> org)
@@ -150,7 +150,7 @@ class AgentInteractionTests(TestCase):
             if handled_count > 0 or i > 3:
                 break
             sleep(2)
-        user_conversations = AgentConversation.objects.filter(wallet=user.wallet, conversation_type="CredentialOffer", status='Pending').all()
+        user_conversations = AgentConversation.objects.filter(connection__wallet=user.wallet, conversation_type="CredentialOffer", status='Pending').all()
         user_conversation_1 = user_conversations[0]
 
         # send credential request (user -> org)
@@ -166,7 +166,7 @@ class AgentInteractionTests(TestCase):
             if poll_count == 1 or i > 3:
                 break
             sleep(2)
-        org_conversation_2 = AgentConversation.objects.filter(wallet=org.wallet, id=message.id).all()[0]
+        org_conversation_2 = AgentConversation.objects.filter(connection__wallet=org.wallet, id=message.id).all()[0]
         if org_conversation_2.conversation_type != 'IssueCredential':
             raise Exception("Expected IssueCredential but got " + org_conversation_2.conversation_type)
         sleep(2)
@@ -180,7 +180,7 @@ class AgentInteractionTests(TestCase):
             if poll_count == 1 or i > 3:
                 break
             sleep(2)
-        user_conversation_3 = AgentConversation.objects.filter(wallet=user.wallet, id=message.id).all()[0]
+        user_conversation_3 = AgentConversation.objects.filter(connection__wallet=user.wallet, id=message.id).all()[0]
         if user_conversation_3.status != 'Accepted':
             raise Exception('Expected Accepted but got' + user_conversation_3.status)
         sleep(2)
@@ -194,7 +194,7 @@ class AgentInteractionTests(TestCase):
             if poll_count == 1 or i > 3:
                 break
             sleep(2)
-        org_conversation_3 = AgentConversation.objects.filter(wallet=org.wallet, id=message.id).all()[0]
+        org_conversation_3 = AgentConversation.objects.filter(connection__wallet=org.wallet, id=message.id).all()[0]
         if org_conversation_3.status != 'Accepted':
             raise Exception('Expected Accepted but got' + org_conversation_3.status)
 
@@ -247,7 +247,7 @@ class AgentInteractionTests(TestCase):
         sleep(2)
 
         # poll to receive credential offer
-        user_conversations = AgentConversation.objects.filter(wallet=user.wallet, conversation_type="CredentialOffer", status='Pending').all()
+        user_conversations = AgentConversation.objects.filter(connection__wallet=user.wallet, conversation_type="CredentialOffer", status='Pending').all()
         self.assertEqual(len(user_conversations), 0)
         user_credentials = list_wallet_credentials(user.wallet)
         self.assertEqual(len(user_credentials), 0)
@@ -260,7 +260,7 @@ class AgentInteractionTests(TestCase):
                 break
             sleep(2)
         self.assertEqual(handled_count, 1)
-        user_conversations = AgentConversation.objects.filter(wallet=user.wallet, conversation_type="CredentialOffer", status='Pending').all()
+        user_conversations = AgentConversation.objects.filter(connection__wallet=user.wallet, conversation_type="CredentialOffer", status='Pending').all()
         self.assertEqual(len(user_conversations), 1)
         user_conversation_1 = user_conversations[0]
 
@@ -384,7 +384,7 @@ class AgentInteractionTests(TestCase):
         sleep(2)
 
         # poll to receive proof request
-        user_conversations = AgentConversation.objects.filter(wallet=user.wallet, conversation_type="ProofRequest", status='Pending').all()
+        user_conversations = AgentConversation.objects.filter(connection__wallet=user.wallet, conversation_type="ProofRequest", status='Pending').all()
         self.assertEqual(len(user_conversations), 0)
 
         i = 0
@@ -395,7 +395,7 @@ class AgentInteractionTests(TestCase):
                 break
             sleep(2)
         self.assertEqual(handled_count, 1)
-        user_conversations = AgentConversation.objects.filter(wallet=user.wallet, conversation_type="ProofRequest", status='Pending').all()
+        user_conversations = AgentConversation.objects.filter(connection__wallet=user.wallet, conversation_type="ProofRequest", status='Pending').all()
         self.assertEqual(len(user_conversations), 1)
         user_conversation_1 = user_conversations[0]
 

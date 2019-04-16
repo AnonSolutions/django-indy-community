@@ -191,8 +191,7 @@ class AgentConnection(models.Model):
 
 # base class for Agent conversations - issue/receive credential and request/provide proof
 class AgentConversation(models.Model):
-    wallet = models.ForeignKey(IndyWallet, to_field="wallet_name", on_delete=models.CASCADE)
-    connection_partner_name = models.CharField(max_length=60)
+    connection = models.ForeignKey(AgentConnection, on_delete=models.CASCADE)
     conversation_type = models.CharField(max_length=30)
     message_id = models.CharField(max_length=30)
     status = models.CharField(max_length=20)
@@ -200,4 +199,4 @@ class AgentConversation(models.Model):
     conversation_data = models.TextField(max_length=4000, blank=True)
 
     def __str__(self):
-        return self.wallet.wallet_name + ":" + self.connection_partner_name + ":" + self.message_id + ", " +  self.conversation_type + " " + self.status
+        return self.connection.wallet.wallet_name + ":" + self.connection.partner_name + ":" + self.message_id + ", " +  self.conversation_type + " " + self.status

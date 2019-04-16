@@ -1375,7 +1375,7 @@ ANON landing page / PROFILE ADJUSTMENTS
 ==================== */
 
 .anon-landing-page {
-	background-image: url(../ANON/imgs/anonbackground.jpg);
+	background-image: url(./anonbackground.jpg);
 	background-size: cover;
 	background-position: center center;
 	overflow-x: hidden;
