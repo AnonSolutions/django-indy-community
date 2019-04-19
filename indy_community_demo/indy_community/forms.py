@@ -122,7 +122,7 @@ class SendCredentialResponseForm(SendConversationResponseForm):
     # a bunch of fields that are read-only to present to the user
     from_partner_name = forms.CharField(label='Partner Name', max_length=60)
     claim_id = forms.CharField(label='Credential Id', max_length=80)
-    claim_name = forms.CharField(label='Credential Name', max_length=80)
+    claim_name = forms.CharField(label='Credential Name', max_length=400)
     credential_attrs = forms.CharField(label='Credential Attrs', max_length=4000, widget=forms.Textarea)
     libindy_offer_schema_id = forms.CharField(label='Schema Id', max_length=120, widget=forms.Textarea)
 
