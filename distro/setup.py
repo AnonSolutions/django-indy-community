@@ -9,7 +9,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='django-indy-community',
-    version='0.1.7',
+    version='0.1.8',
     packages=find_packages(),
     include_package_data=True,
     license='996.ICU License',  # see https://github.com/996icu/996.ICU
