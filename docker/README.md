@@ -1,6 +1,6 @@
-# Install and run Django Indy Community
+# Install and run the Django Indy Community Demo Application
 
-There are two options to run the environment locally - running in docker (recommended) or running all the services locally on "bare metal".
+There are two options to run the application locally - running in docker (recommended) or running all the services locally on "bare metal".
 
 
 ## Running Django Indy Community - Docker Version (recommended)
@@ -22,6 +22,8 @@ cd django-indy-community/docker
 ./base-image      # note that this takes about 30 mintues
 ./manage start
 ```
+
+Note that the "base-image" step is optional - the docker images are published on DockerHub - however this step is included for those interested in the inderlying Indy frameworks, how to build them, etc.
 
 That's it!  Your docker is up and running, open a browser and navigate to http://localhost:8000/
 

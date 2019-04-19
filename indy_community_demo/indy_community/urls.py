@@ -31,7 +31,7 @@ urlpatterns = [
     path('check_conversation/', poll_conversation_status, name='check_conversation'),
     path('list_credentials/', list_wallet_credentials, name='list_credentials'),
     path('profile/', plugin_view, name='indy_profile', kwargs={'view_name': 'INDY_PROFILE_VIEW'}),
-    path('data/', plugin_view, name='indy_org_data', kwargs={'view_name': 'INDY_ORG_DATA_VIEW'}),
+    path('data/', plugin_view, name='indy_data', kwargs={'view_name': 'INDY_DATA_VIEW'}),
     path('wallet/', plugin_view, name='indy_wallet', kwargs={'view_name': 'INDY_WALLET_VIEW'}),
     path('connections/', list_connections, name='connections'),
     path('conversations/', list_conversations, name='conversations'),

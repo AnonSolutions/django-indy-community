@@ -68,7 +68,7 @@ Proof of Education:
   description: Proof of Education for Employment Application
   revealed_attributes:
     - {'name':'first_name'}
-    - {'name':'last_name'},
+    - {'name':'last_name'}
     - {'name':'degree', 'restrictions': [{'cred_def_id': $CRED_DEF_ID}]}
     - {'name':'status','restrictions': [{'cred_def_id': $CRED_DEF_ID}]}
     - {'name':'ssn', 'restrictions': [{'cred_def_id': $CRED_DEF_ID}]}
