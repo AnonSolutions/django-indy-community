@@ -72,7 +72,8 @@ async def pool_genesis_txn_data():
                 pool_ip, pool_ip)
         ])
 
-    f = open("/tmp/atria-genesis.txt", "w+")
+    indy_config = getattr(settings, 'INDY_CONFIG')
+    f = open(indy_config['vcx_genesis_path'], "w+")
     f.write(genesis_txn)
     f.close()
 

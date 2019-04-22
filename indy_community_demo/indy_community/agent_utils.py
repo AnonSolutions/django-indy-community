@@ -68,6 +68,7 @@ def initialize_and_provision_vcx(wallet_name, raw_password, institution_name, di
     provisionConfig = vcx_provision_config(wallet_name, raw_password, institution_name, did_seed=did_seed, org_role=org_role, institution_logo_url=institution_logo_url)
 
     print(" >>> Provision an agent and wallet, get back configuration details")
+    print("provisionConfig", provisionConfig)
     try:
         provisionConfig_json = json.dumps(provisionConfig)
         config = run_coroutine_with_args(vcx_agent_provision, provisionConfig_json)
@@ -270,7 +271,13 @@ def send_connection_confirmation(wallet, connection_id, partner_name, invite_det
 
     # create connection and generate invitation
     try:
+        print("=================================")
+        print("invite_details", invite_details)
+        print("=================================")
         connection_from_ = run_coroutine_with_args(Connection.create_with_details, partner_name, invite_details)
+        connection_data = run_coroutine(connection_from_.serialize)
+        print("connection_from_", connection_data)
+        print("=================================")
         run_coroutine_with_args(connection_from_.connect, '{"use_public_did": true}')
         run_coroutine(connection_from_.update_state)
 
