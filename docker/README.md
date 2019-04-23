@@ -116,7 +116,11 @@ cd indy-sdk/vcx/dummy-cloud-agent
 cargo run config.json
 ```
 
-5. Open 2 shells to run the Django Indy Community edition:
+5. TODO install the Python requirements
+
+TODO ...  also check the VCX Python library dependency
+
+6. Open 2 shells to run the Django Indy Community edition:
 
 ```bash
 cd django-indy-community/indy_community_demo
@@ -131,7 +135,7 @@ cd django-indy-community/indy_community_demo
 python manage.py process_tasks
 ```
 
-6. Whew!  One more - start up the von-network ledger browser - this also provides the capability to register DID's on the ledger for our Test organizations:
+7. Whew!  One more - start up the von-network ledger browser - this also provides the capability to register DID's on the ledger for our Test organizations:
 
 ```bash
 cd von-network
