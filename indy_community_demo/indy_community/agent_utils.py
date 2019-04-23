@@ -68,7 +68,6 @@ def initialize_and_provision_vcx(wallet_name, raw_password, institution_name, di
     provisionConfig = vcx_provision_config(wallet_name, raw_password, institution_name, did_seed=did_seed, org_role=org_role, institution_logo_url=institution_logo_url)
 
     print(" >>> Provision an agent and wallet, get back configuration details")
-    print("provisionConfig", provisionConfig)
     try:
         provisionConfig_json = json.dumps(provisionConfig)
         config = run_coroutine_with_args(vcx_agent_provision, provisionConfig_json)
@@ -271,13 +270,8 @@ def send_connection_confirmation(wallet, connection_id, partner_name, invite_det
 
     # create connection and generate invitation
     try:
-        print("=================================")
-        print("invite_details", invite_details)
-        print("=================================")
         connection_from_ = run_coroutine_with_args(Connection.create_with_details, partner_name, invite_details)
         connection_data = run_coroutine(connection_from_.serialize)
-        print("connection_from_", connection_data)
-        print("=================================")
         run_coroutine_with_args(connection_from_.connect, '{"use_public_did": true}')
         run_coroutine(connection_from_.update_state)
 
@@ -482,7 +476,9 @@ def send_proof_request(wallet, connection, proof_uuid, proof_name, proof_attrs, 
     return conversation
 
 
-def get_claims_for_proof_request(wallet, connection, my_conversation, initialize_vcx=True):
+# note additional filters are exact match only (attr=value) to filter the allowable claims
+# required temporarily because vcx doesn't support the additional filters allowed by indy-sdk
+def get_claims_for_proof_request(wallet, connection, my_conversation, additional_filters=None, initialize_vcx=True):
     if initialize_vcx:
         try:
             config_json = wallet.wallet_config
@@ -498,6 +494,27 @@ def get_claims_for_proof_request(wallet, connection, my_conversation, initialize
         proof = run_coroutine_with_args(DisclosedProof.create, 'proof', json.loads(my_conversation.conversation_data))
 
         creds_for_proof = run_coroutine(proof.get_creds)
+        # TODO check for filters; remove once this is available in VCX
+        if additional_filters and 0 < len(list(additional_filters.keys())):
+            ret_creds_for_proof = creds_for_proof.copy()
+            for attr in creds_for_proof['attrs']:
+                # build array of credential id's (from wallet)
+                claims = creds_for_proof['attrs'][attr]
+                if 0 < len(claims):
+                    ret_claims = []
+                    for claim in claims:
+                        # TODO this should be filtered using "extra query parameters" in VCX
+                        ret = True
+                        for key in additional_filters.keys():
+                            if claim['cred_info']['attrs'][key] != additional_filters[key]:
+                                ret = False
+                        if ret:
+                            ret_claims.append(claim)
+                    ret_creds_for_proof['attrs'][attr] = ret_claims
+                else:
+                    # if no claim available, we'll request a self-attested value
+                    pass
+            creds_for_proof = ret_creds_for_proof
     except:
         raise
     finally:
