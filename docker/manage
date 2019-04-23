@@ -205,7 +205,7 @@ start-bcovrin|up-bcovrin)
   docker-compose logs -f
  ;;
 start-stn|up-stn)
-  _startupParams=$(getStartupParamsStn $@)
+  _startupParams=$(getStartupParams $@)
   configureEnvironment $@
   docker-compose -f docker-compose-stn.yml up -d ${_startupParams} 
   docker-compose logs -f
