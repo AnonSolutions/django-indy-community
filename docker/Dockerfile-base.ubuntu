@@ -92,9 +92,9 @@ RUN git clone https://github.com/pyenv/pyenv.git "$PYENV_ROOT" && \
     pip install --no-cache-dir --upgrade pip~=9.0.0
 
 # set to --release for smaller, optimized library
-ARG indy_build_flags=
+ARG indy_build_flags=--release
 
-ARG indy_sdk_url=https://codeload.github.com/ianco/indy-sdk/tar.gz/3adea712abc98ddbd9e421b3e6ee7824385eb605
+ARG indy_sdk_url=https://codeload.github.com/ianco/indy-sdk/tar.gz/d293f4735850005d65a2a507d671b53fea23c04c
 ARG indy_crypto_url=https://codeload.github.com/hyperledger/indy-crypto/tar.gz/1675e29a2a5949b44899553d3d128335cf7a61b3
 
 ENV LIBRARY_PATH="$HOME/.local/lib:$LIBRARY_PATH"
@@ -103,12 +103,16 @@ ENV LIBRARY_PATH="$HOME/.local/lib:$LIBRARY_PATH"
 RUN curl -o rustup https://sh.rustup.rs && \
     chmod +x rustup && \
     ./rustup -y && \
-    mkdir indy-sdk indy-crypto
+    mkdir indy-sdk indy-crypto indy-sdk-src
 
 RUN curl -o indy-sdk/indy-sdk.tar.gz "${indy_sdk_url}" && \
     curl -o indy-crypto/indy-crypto.tar.gz "${indy_crypto_url}"
 
-RUN cd indy-sdk && \
+RUN cd indy-sdk-src && \
+    tar xzf ../indy-sdk/indy-sdk.tar.gz && \
+    mv indy-sdk-*/* . && \
+    rm -rf indy-sdk-* && \
+    cd ../indy-sdk && \
     tar xzf indy-sdk.tar.gz && \
     cd */libindy && \
     $HOME/.cargo/bin/cargo build ${indy_build_flags} && \
