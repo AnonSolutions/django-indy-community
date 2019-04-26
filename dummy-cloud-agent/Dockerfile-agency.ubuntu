@@ -1,0 +1,6 @@
+FROM anonsolutions/indy-base
+
+# Add vcx agency config
+ADD anon-agency-config.json .
+
+ENTRYPOINT ["indy-dummy-agent", "anon-agency-config.json"]
