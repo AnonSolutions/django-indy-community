@@ -7,6 +7,7 @@ from django.contrib.auth.models import Group, PermissionsMixin
 from django.utils import timezone
 
 from datetime import datetime, date, timedelta
+import json
 
 
 USER_ROLES = (
@@ -187,6 +188,32 @@ class AgentConnection(models.Model):
 
     def __str__(self):
         return self.wallet.wallet_name + ":" + self.partner_name + ", " +  self.status
+
+    # script from @burdettadam, map to the invite format expected by Connect.Me
+    def invitation_shortform(self, source_name, target_name, institution_logo_url):
+        invite = json.loads(self.invitation)
+        cm_invite = { "id": invite["connReqId"],
+                "s" :{"d" :invite["senderDetail"]["DID"],
+                        "dp":{"d":invite["senderDetail"]["agentKeyDlgProof"]["agentDID"],
+                              "k":invite["senderDetail"]["agentKeyDlgProof"]["agentDelegatedKey"],
+                              "s":invite["senderDetail"]["agentKeyDlgProof"]["signature"]
+                            },
+                        "l" :invite["senderDetail"]["logoUrl"],
+                        "n" :invite["senderDetail"]["name"],
+                        "v" :invite["senderDetail"]["verKey"]
+                        },
+                "sa":{"d":invite["senderAgencyDetail"]["DID"],
+                        "e":invite["senderAgencyDetail"]["endpoint"],
+                        "v":invite["senderAgencyDetail"]["verKey"]
+                    },
+                "sc":invite["statusCode"],
+                "sm":invite["statusMsg"],
+                "t" :invite["targetName"]
+                }
+        cm_invite["s"]["n"] = source_name
+        cm_invite["t"] = target_name
+        cm_invite["s"]["l"] = institution_logo_url
+        return json.dumps(cm_invite)
 
 
 # base class for Agent conversations - issue/receive credential and request/provide proof

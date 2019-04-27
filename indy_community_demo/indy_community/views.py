@@ -1,8 +1,11 @@
-from django.http import HttpResponseBadRequest, HttpResponseRedirect
+from django.http import HttpResponseBadRequest, HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, get_user_model, login
 from django.urls import reverse
 from django.conf import settings
+
+import pyqrcode
+#import qrcode
 
 from .forms import *
 from .models import *
@@ -176,7 +179,13 @@ def handle_connection_request(request):
                         status = 'Pending')
                     their_connection.save()
 
-                return render(request, 'indy/form_response.html', {'msg': 'Updated connection for ' + wallet.wallet_name, 'msg_txt': my_connection.invitation, 'msg_txt2': my_connection.token })
+                if my_connection.wallet.wallet_org.get():
+                    source_name = my_connection.wallet.wallet_org.get().org_name
+                else:
+                    source_name = my_connection.wallet.wallet_user.get().email
+                target_name = my_connection.partner_name
+                institution_logo_url = 'https://anon-solutions.ca/favicon.ico'
+                return render(request, 'indy/connection/form_connection_info.html', {'msg': 'Updated connection for ' + wallet.wallet_name, 'msg_txt': my_connection.invitation, 'msg_txt2': my_connection.token, 'msg_txt3': my_connection.invitation_shortform(source_name, target_name, institution_logo_url) })
             except IndyError:
                 # ignore errors for now
                 print(" >>> Failed to create request for", wallet.wallet_name)
@@ -274,6 +283,35 @@ def poll_connection_status(request):
                                                   'wallet_name': connections[0].wallet.wallet_name })
 
         return render(request, 'indy/connection/status.html', {'form': form})
+
+
+def connection_qr_code(request, token):
+    # find connection for requested token
+    connections = AgentConnection.objects.filter(token=token, connection_type='Outbound').all()
+    if 0 == len(connections):
+        return render(request, 'indy/form_response.html', {'msg': 'No connection found'})
+
+    connection = connections[0]
+    #qr = qrcode.QRCode(version=27, box_size=4)
+    #qr.add_data(connection.invitation_shortform())
+    #qr.make(fit=True)
+    #image = qr.make_image()
+    source_name = connection.partner_name
+    target_name = connection.partner_name
+    if connection.wallet.wallet_org.get():
+        source_name = connection.wallet.wallet_org.get().org_name
+    else:
+        source_name = connection.wallet.wallet_user.get().email
+    institution_logo_url = 'https://anon-solutions.ca/favicon.ico'
+    qr = pyqrcode.create(connection.invitation_shortform(source_name, target_name, institution_logo_url))
+    path_to_image = '/tmp/'+token+'qr-offer.png'
+    qr.png(path_to_image, scale=4, module_color=[0, 0, 0, 128], background=[0xff, 0xff, 0xcc])
+    image_data = open(path_to_image, "rb").read()
+
+    # serialize to HTTP response
+    response = HttpResponse(image_data, content_type="image/png")
+    #image.save(response, "PNG")
+    return response
 
 
 ######################################################################

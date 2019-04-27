@@ -18,6 +18,8 @@ cd von-network
 
 ```bash
 git clone https://github.com/AnonSolutions/django-indy-community.git
+# this is necessary only on 'nix since we are mounting local directories
+chmod -R a+rwx django-indy-community/indy_community_demo
 cd django-indy-community/docker
 ./base-image      # note that this takes about 30 mintues
 ./manage start
@@ -36,7 +38,7 @@ To shut down the environment, CTRL-C to stop the docker services and then in eac
 
 ### Running Django Indy Community - "Bare Metal" Version
 
-If you compare to the previous option, these are basically all the steps executed to build the docker environment.
+These are basically all the steps executed to build the docker environment.
 
 Note it is recommended to build/run on either Ubuntu 16.04 or on the latest Mac o/s.
 
@@ -114,7 +116,11 @@ cd indy-sdk/vcx/dummy-cloud-agent
 cargo run config.json
 ```
 
-5. Open 2 shells to run the Django Indy Community edition:
+5. TODO install the Python requirements
+
+TODO ...  also check the VCX Python library dependency
+
+6. Open 2 shells to run the Django Indy Community edition:
 
 ```bash
 cd django-indy-community/indy_community_demo
@@ -129,7 +135,7 @@ cd django-indy-community/indy_community_demo
 python manage.py process_tasks
 ```
 
-6. Whew!  One more - start up the von-network ledger browser - this also provides the capability to register DID's on the ledger for our Test organizations:
+7. Whew!  One more - start up the von-network ledger browser - this also provides the capability to register DID's on the ledger for our Test organizations:
 
 ```bash
 cd von-network
