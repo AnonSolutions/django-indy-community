@@ -6,3 +6,4 @@ include requirements-local.txt
 recursive-include requirements *
 recursive-include indy_community/templates *
 recursive-include docs *
+exclude indy_community/static

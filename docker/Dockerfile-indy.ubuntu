@@ -2,6 +2,6 @@ FROM anonsolutions/indy-base
 
 # Install indy python libraries and other dependencies
 ADD requirements-docker-indy-community.txt .
-RUN pip install --no-cache-dir -r requirements-docker-indy-community.txt
+RUN pip install -r requirements-docker-indy-community.txt
 
 CMD ["bash"]
