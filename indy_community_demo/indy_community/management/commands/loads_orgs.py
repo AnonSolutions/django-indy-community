@@ -61,6 +61,10 @@ class Command(BaseCommand):
                 email = org['email']
                 password = org['password']
                 role_name = org['role']
+                if 'ico_url' in org:
+                    ico_url = org['ico_url']
+                else:
+                    ico_url = None
 
                 if "$random" in name:
                     name = name.replace("$random", random_alpha_string(12))
@@ -84,4 +88,4 @@ class Command(BaseCommand):
                     for attr in org['relation']:
                         relation_attrs[attr] = get_attr_value(org['relation'][attr])
                 org_role, created = IndyOrgRole.objects.get_or_create(name=role_name)
-                org = org_signup(user, password, name, org_attrs=org_attrs, org_relation_attrs=relation_attrs, org_role=org_role)
+                org = org_signup(user, password, name, org_attrs=org_attrs, org_relation_attrs=relation_attrs, org_role=org_role, org_ico_url=ico_url)

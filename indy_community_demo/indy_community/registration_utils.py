@@ -42,7 +42,7 @@ def org_provision(org, raw_password, org_role=None):
         create_and_register_did(wallet_name, org_role)
 
     # provision as an agent wallet (errors will raise exceptions)
-    config = initialize_and_provision_vcx(wallet_name, raw_password, org.org_name, did_seed=did_seed, org_role=org_role)
+    config = initialize_and_provision_vcx(wallet_name, raw_password, org.org_name, did_seed=did_seed, org_role=org_role, institution_logo_url=org.ico_url)
 
     # save everything to our database
     wallet = IndyWallet.objects.create(wallet_name=wallet_name, wallet_config = config)
@@ -59,11 +59,14 @@ def org_provision(org, raw_password, org_role=None):
     return org
 
 
-def org_signup(user, raw_password, org_name, org_attrs={}, org_relation_attrs={}, org_role=None):
+def org_signup(user, raw_password, org_name, org_attrs={}, org_relation_attrs={}, org_role=None, org_ico_url=None):
     """
     Helper method to create and provision a new org, and associate to the current user
     """
-    org = get_indy_settings_model('INDY_ORGANIZATION_MODEL').objects.create(org_name=org_name, role=org_role, **org_attrs)
+    if not org_ico_url:
+        org_ico_url = 'http://robohash.org/456'
+
+    org = get_indy_settings_model('INDY_ORGANIZATION_MODEL').objects.create(org_name=org_name, role=org_role, ico_url=org_ico_url, **org_attrs)
 
     org = org_provision(org, raw_password, org_role)
 

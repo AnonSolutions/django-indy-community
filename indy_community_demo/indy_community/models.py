@@ -117,6 +117,7 @@ class IndyOrganization(models.Model):
     org_name = models.CharField(max_length=60, unique=True)
     wallet = models.ForeignKey(IndyWallet, to_field="wallet_name", related_name='wallet_org', blank = True, null=True, on_delete=models.CASCADE)
     role = models.ForeignKey(IndyOrgRole, blank = True, null=True, on_delete=models.CASCADE)
+    ico_url = models.CharField(max_length=120, blank = True, null=True)
 
     def __str__(self):
         return self.org_name

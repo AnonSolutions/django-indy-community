@@ -64,8 +64,9 @@ def org_signup_view(request):
             # create and provision org, including org wallet
             org_name = form.cleaned_data.get('org_name')
             org_role_name = form.cleaned_data.get('org_role_name')
+            org_ico_url = form.cleaned_data.get('ico_url')
             org_role, created = IndyOrgRole.objects.get_or_create(name=org_role_name)
-            org = org_signup(user, raw_password, org_name, org_role)
+            org = org_signup(user, raw_password, org_name, org_role=org_role, org_ico_url=org_ico_url)
 
             # TODO need to auto-login with Atria custom user
             #login(request, user)
@@ -300,9 +301,12 @@ def connection_qr_code(request, token):
     target_name = connection.partner_name
     if connection.wallet.wallet_org.get():
         source_name = connection.wallet.wallet_org.get().org_name
+        institution_logo_url = connection.wallet.wallet_org.get().ico_url
     else:
         source_name = connection.wallet.wallet_user.get().email
-    institution_logo_url = 'https://anon-solutions.ca/favicon.ico'
+        institution_logo_url = None
+    if not institution_logo_url:
+        institution_logo_url = 'http://robohash.org/456'
     qr = pyqrcode.create(connection.invitation_shortform(source_name, target_name, institution_logo_url))
     path_to_image = '/tmp/'+token+'qr-offer.png'
     qr.png(path_to_image, scale=4, module_color=[0, 0, 0, 128], background=[0xff, 0xff, 0xcc])
