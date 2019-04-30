@@ -227,6 +227,7 @@ def handle_connection_request(request):
                         wallet = their_wallet,
                         partner_name = wallet_owner,
                         invitation = my_connection.invitation,
+                        token = my_connection.token,
                         connection_type = 'Inbound',
                         status = 'Pending')
                     their_connection.save()
