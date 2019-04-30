@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 
 import json
 
@@ -8,9 +9,20 @@ from .models import *
 
 
 ###############################################################
+# Forms to request a connection to a mobile wallet (user only)
+###############################################################
+class RequestMobileConnectionForm(UserCreationForm):
+    email = forms.CharField(label='Email', max_length=120)
+    org = forms.ModelChoiceField(label='Organization', queryset=IndyOrganization.objects.filter(Q(role__name='School') | Q(role__name='Employer') | Q(role__name='Bank') | Q(role__name='Goverment')).all())
+
+    class Meta:
+        model = get_user_model()
+        fields = ('first_name', 'last_name', 'email', 'password1', 'password2', 'org')
+
+
+###############################################################
 # Forms to support user and organization registration
 ###############################################################
-
 class UserSignUpForm(UserCreationForm):
     first_name = forms.CharField(max_length=80, label='First Name', required=False,
                                  help_text='Optional.')
