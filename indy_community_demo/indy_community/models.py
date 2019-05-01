@@ -76,6 +76,7 @@ class IndyUser(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField(default=timezone.now)
     last_login = models.DateTimeField(blank=True, null=True)
     wallet = models.ForeignKey(IndyWallet, to_field="wallet_name", related_name='wallet_user', blank = True, null=True, on_delete=models.CASCADE)
+    managed_wallet = models.BooleanField(default=True)
 
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'email'
@@ -117,6 +118,8 @@ class IndyOrganization(models.Model):
     org_name = models.CharField(max_length=60, unique=True)
     wallet = models.ForeignKey(IndyWallet, to_field="wallet_name", related_name='wallet_org', blank = True, null=True, on_delete=models.CASCADE)
     role = models.ForeignKey(IndyOrgRole, blank = True, null=True, on_delete=models.CASCADE)
+    ico_url = models.CharField(max_length=120, blank = True, null=True)
+    managed_wallet = models.BooleanField(default=True)
 
     def __str__(self):
         return self.org_name

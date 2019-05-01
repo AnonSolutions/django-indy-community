@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 
 import json
 
@@ -8,16 +9,27 @@ from .models import *
 
 
 ###############################################################
+# Forms to request a connection to a mobile wallet (user only)
+###############################################################
+class RequestMobileConnectionForm(UserCreationForm):
+    email = forms.CharField(label='Email', max_length=120)
+    org = forms.ModelChoiceField(label='Organization', queryset=IndyOrganization.objects.filter(Q(role__name='School') | Q(role__name='Employer') | Q(role__name='Bank') | Q(role__name='Goverment')).all())
+
+    class Meta:
+        model = get_user_model()
+        fields = ('first_name', 'last_name', 'email', 'password1', 'password2', 'org')
+
+
+###############################################################
 # Forms to support user and organization registration
 ###############################################################
-
 class UserSignUpForm(UserCreationForm):
-    first_name = forms.CharField(max_length=80, required=False,
+    first_name = forms.CharField(max_length=80, label='First Name', required=False,
                                  help_text='Optional.')
-    last_name = forms.CharField(max_length=150, required=False,
-                                help_text='Optional.')
-    email = forms.EmailField(
-        max_length=254, help_text='Required. Provide a valid email address.')
+    last_name = forms.CharField(max_length=150, label='Last Name', required=False,
+                                 help_text='Optional.')
+    email = forms.EmailField(max_length=254, label='Email Address', required=True,
+                                 help_text='Required. Provide a valid email address.')
 
     class Meta:
         model = get_user_model()
@@ -25,10 +37,11 @@ class UserSignUpForm(UserCreationForm):
 
 
 class OrganizationSignUpForm(UserSignUpForm):
-    org_name = forms.CharField(max_length=60, required=True,
+    org_name = forms.CharField(max_length=60, label='Company Name', required=True,
                                  help_text='Required.')
-    org_role_name = forms.CharField(max_length=40, required=True,
+    org_role_name = forms.CharField(max_length=40, label='Company Role', required=True,
                                  help_text='Required.')
+    ico_url = forms.CharField(max_length=120, label="URL for company logo", required=False)
 
 
 ######################################################################
