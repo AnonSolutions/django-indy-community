@@ -119,9 +119,9 @@ class SelectCredentialOfferForm(WalletNameForm):
 
 class SendCredentialOfferForm(WalletNameForm):
     connection_id = forms.IntegerField(label="Connection Id")
-    credential_tag = forms.CharField(label='Credential Tag', max_length=80)
-    credential_name = forms.CharField(label='Credential Name', max_length=80)
     cred_def = forms.CharField(label='Cred Def', max_length=80)
+    credential_name = forms.CharField(label='Credential Name', max_length=80)
+    credential_tag = forms.CharField(label='Credential Tag', max_length=80)
     schema_attrs = forms.CharField(label='Credential Attrs', max_length=4000, widget=forms.Textarea)
 
     def __init__(self, *args, **kwargs):
@@ -164,7 +164,6 @@ class SelectProofRequestForm(WalletNameForm):
 class SendProofRequestForm(WalletNameForm):
     connection_id = forms.IntegerField(label="Connection Id")
     proof_name = forms.CharField(label='Proof Name', max_length=400)
-    proof_uuid = forms.CharField(label='Proof UUID', max_length=60)
     proof_attrs = forms.CharField(label='Proof Attributes', max_length=4000, widget=forms.Textarea)
     proof_predicates = forms.CharField(label='Proof Predicates', max_length=4000, widget=forms.Textarea)
 
@@ -179,18 +178,19 @@ class SendProofReqResponseForm(SendConversationResponseForm):
     from_partner_name = forms.CharField(label='Partner Name', max_length=60)
     proof_req_name = forms.CharField(label='Proof Request Name', max_length=400)
     # TODO not sure if this element is required on this form ...
-    requested_attrs = forms.CharField(label='Requested Attrs', widget=forms.HiddenInput)
+    #requested_attrs = forms.CharField(label='Requested Attrs', widget=forms.HiddenInput)
 
     def __init__(self, *args, **kwargs):
         super(SendProofReqResponseForm, self).__init__(*args, **kwargs)
         self.fields['from_partner_name'].widget.attrs['readonly'] = True
         self.fields['proof_req_name'].widget.attrs['readonly'] = True
         # TODO not sure if this element is required on this form ...
-        self.fields['requested_attrs'].widget.attrs['readonly'] = True
+        #self.fields['requested_attrs'].widget.attrs['readonly'] = True
 
 
 class SelectProofReqClaimsForm(SendProofReqResponseForm):
     # TODO maybe move requested_attrs to this form (?)
+    requested_attrs = forms.CharField(label='Requested Attrs', widget=forms.HiddenInput)
 
     def __init__(self, *args, **kwargs):
         super(SelectProofReqClaimsForm, self).__init__(*args, **kwargs)

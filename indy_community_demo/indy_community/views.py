@@ -6,6 +6,7 @@ from django.conf import settings
 
 import pyqrcode
 #import qrcode
+import uuid
 
 from .forms import *
 from .models import *
@@ -432,6 +433,9 @@ def handle_select_credential_offer(request):
             connection_id = cd.get('connection_id')
             cred_def = cd.get('cred_def')
 
+            credential_name = cred_def.creddef_name
+            credential_tag = cred_def.creddef_name
+
             # log out of current wallet, if any
             wallet = wallet_for_current_session(request)
 
@@ -441,7 +445,9 @@ def handle_select_credential_offer(request):
             form = SendCredentialOfferForm(initial={ 'connection_id': connection_id,
                                                      'wallet_name': connections[0].wallet.wallet_name,
                                                      'cred_def': cred_def.id,
-                                                     'schema_attrs': schema_attrs })
+                                                     'schema_attrs': schema_attrs,
+                                                     'credential_name': credential_name,
+                                                     'credential_tag': credential_tag })
 
             return render(request, 'indy/credential/offer.html', {'form': form})
 
@@ -465,10 +471,10 @@ def handle_credential_offer(request):
         else:
             cd = form.cleaned_data
             connection_id = cd.get('connection_id')
-            credential_tag = cd.get('credential_tag')
             cred_def_id = cd.get('cred_def')
             schema_attrs = cd.get('schema_attrs')
             credential_name = cd.get('credential_name')
+            credential_tag = cd.get('credential_tag')
 
             wallet = wallet_for_current_session(request)
     
@@ -601,7 +607,7 @@ def handle_proof_req_response(request):
                                                  'wallet_name': connection.wallet.wallet_name,
                                                  'from_partner_name': connection.partner_name,
                                                  'proof_req_name': indy_conversation['proof_request_data']['name'],
-                                                 'requested_attrs': indy_conversation['proof_request_data']['requested_attributes'],
+                                                 #'requested_attrs': indy_conversation['proof_request_data']['requested_attributes'],
                                                 })
 
     return render(request, 'indy/proof/send_response.html', {'form': form})
@@ -758,10 +764,10 @@ def handle_send_proof_request(request):
         else:
             cd = form.cleaned_data
             connection_id = cd.get('connection_id')
-            proof_uuid = cd.get('proof_uuid')
             proof_name = cd.get('proof_name')
             proof_attrs = cd.get('proof_attrs')
             proof_predicates = cd.get('proof_predicates')
+            proof_uuid = str(uuid.uuid4())
 
             wallet = wallet_for_current_session(request)
     
