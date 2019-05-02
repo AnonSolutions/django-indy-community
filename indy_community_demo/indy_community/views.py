@@ -472,9 +472,15 @@ def handle_credential_offer(request):
             cd = form.cleaned_data
             connection_id = cd.get('connection_id')
             cred_def_id = cd.get('cred_def')
-            schema_attrs = cd.get('schema_attrs')
             credential_name = cd.get('credential_name')
             credential_tag = cd.get('credential_tag')
+            schema_attrs = cd.get('schema_attrs')
+            schema_attrs = json.loads(schema_attrs)
+            for attr in schema_attrs:
+                field_name = 'schema_attr_' + attr
+                field_value = request.POST.get(field_name)
+                schema_attrs[attr] = field_value
+            schema_attrs = json.dumps(schema_attrs)
 
             wallet = wallet_for_current_session(request)
     
@@ -607,7 +613,6 @@ def handle_proof_req_response(request):
                                                  'wallet_name': connection.wallet.wallet_name,
                                                  'from_partner_name': connection.partner_name,
                                                  'proof_req_name': indy_conversation['proof_request_data']['name'],
-                                                 #'requested_attrs': indy_conversation['proof_request_data']['requested_attributes'],
                                                 })
 
     return render(request, 'indy/proof/send_response.html', {'form': form})
@@ -634,7 +639,6 @@ def handle_proof_select_claims(request):
             my_connection = my_conversation.connection
 
             # get selected attributes for proof request
-            print("Map requested attributes")
             requested_attributes = indy_conversation['proof_request_data']['requested_attributes']
             requested_predicates = indy_conversation['proof_request_data']['requested_predicates']
             credential_attrs = {}
