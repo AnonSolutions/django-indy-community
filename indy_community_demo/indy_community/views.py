@@ -802,7 +802,7 @@ def handle_view_proof(request):
     conversations = AgentConversation.objects.filter(id=conversation_id, connection__wallet=wallet).all()
     # TODO validate conversation id
     conversation = conversations[0]
-    return render(request, 'indy/form_response.html', {'msg': "Proof Reveived", 'msg_txt': conversation.conversation_data})
+    return render(request, 'indy/proof/view_proof.html', {'conversation': json.loads(conversation.conversation_data)})
 
 
 ######################################################################
