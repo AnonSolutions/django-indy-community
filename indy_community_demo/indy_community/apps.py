@@ -20,6 +20,8 @@ from indy.error import ErrorCode, IndyError
 
 from django.conf import settings
 
+from .indy_state import set_pool_handle
+
 
 PROTOCOL_VERSION = 2
 
@@ -127,7 +129,8 @@ class IndyCoreConfig(AppConfig):
             print('Error unable to load payment plug-in {}'.format(result))
             raise AppError('Error unable to load payment plug-in {}'.format(result))
 
-        run_coroutine(run)
+        pool_handle = run_coroutine(run)
+        set_pool_handle(pool_handle)
         time.sleep(1)  # FIXME waiting for libindy thread complete
 
         print("App is ready!!!")
@@ -154,4 +157,5 @@ async def run():
             pass
     pool_handle = await pool.open_pool_ledger(pool_['name'], None)
     print("Returned pool handle", pool_handle)
+    return pool_handle
 
