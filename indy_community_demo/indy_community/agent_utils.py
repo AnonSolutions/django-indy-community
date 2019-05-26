@@ -336,7 +336,7 @@ def check_connection_status(wallet, connection, initialize_vcx=True):
         my_connection.status = return_state
         my_connection.save()
 
-        check_connection_callback(connection, prev_status)
+        check_connection_callback(my_connection, prev_status)
     except:
         raise
     finally:
