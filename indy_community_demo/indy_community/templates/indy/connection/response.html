@@ -15,7 +15,9 @@
               {% csrf_token %}
               {% for field in form %}
                 <div>
-                  <h5>{{ field.label_tag }}</h5>
+                  {% if not field.is_hidden %}
+                    <h5>{{ field.label_tag }}</h5>
+                  {% endif %}
                   {{ field }}
                   {% for error in field.errors %}
                     <p style="color: red">{{ error }}</p>

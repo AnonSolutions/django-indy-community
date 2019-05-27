@@ -48,10 +48,17 @@ class OrganizationSignUpForm(UserSignUpForm):
 # forms to create and confirm agent-to-agent connections
 ######################################################################
 class WalletNameForm(forms.Form):
-    wallet_name = forms.CharField(label='Wallet Name', max_length=60)
+    wallet_name = forms.CharField(widget=forms.HiddenInput())
 
     def __init__(self, *args, **kwargs):
         super(WalletNameForm, self).__init__(*args, **kwargs)
+        self.fields['wallet_name'].widget.attrs['readonly'] = True
+
+class VisibleWalletNameForm(forms.Form):
+    wallet_name = forms.CharField(max_length=60)
+
+    def __init__(self, *args, **kwargs):
+        super(VisibleWalletNameForm, self).__init__(*args, **kwargs)
         self.fields['wallet_name'].widget.attrs['readonly'] = True
 
 
@@ -61,19 +68,19 @@ class SendConnectionInvitationForm(WalletNameForm):
     def __init__(self, *args, **kwargs):
         super(SendConnectionInvitationForm, self).__init__(*args, **kwargs)
         self.fields['wallet_name'].widget.attrs['readonly'] = True
+        self.fields['wallet_name'].widget.attrs['hidden'] = True
 
 
 class SendConnectionResponseForm(SendConnectionInvitationForm):
-    connection_id = forms.IntegerField(label="Id")
+    connection_id = forms.IntegerField(widget=forms.HiddenInput())
     invitation_details = forms.CharField(label='Invitation', max_length=4000, widget=forms.Textarea)
 
     def __init__(self, *args, **kwargs):
         super(SendConnectionResponseForm, self).__init__(*args, **kwargs)
         self.fields['connection_id'].widget.attrs['readonly'] = True
-        #self.fields['invitation_details'].widget.attrs['readonly'] = True
 
 
-class PollConnectionStatusForm(WalletNameForm):
+class PollConnectionStatusForm(VisibleWalletNameForm):
     connection_id = forms.IntegerField(label="Id")
 
     def __init__(self, *args, **kwargs):
@@ -86,31 +93,35 @@ class PollConnectionStatusForm(WalletNameForm):
 # forms to offer, request, send and receive credentials
 ######################################################################
 class SendConversationResponseForm(WalletNameForm):
-    conversation_id = forms.IntegerField(label="Id")
+    conversation_id = forms.IntegerField(widget=forms.HiddenInput())
 
     def __init__(self, *args, **kwargs):
         super(SendConversationResponseForm, self).__init__(*args, **kwargs)
         self.fields['wallet_name'].widget.attrs['readonly'] = True
+        self.fields['wallet_name'].widget.attrs['hidden'] = True
         self.fields['conversation_id'].widget.attrs['readonly'] = True
 
 
-class PollConversationStatusForm(WalletNameForm):
+class PollConversationStatusForm(VisibleWalletNameForm):
     conversation_id = forms.IntegerField(label="Id")
 
     def __init__(self, *args, **kwargs):
         super(PollConversationStatusForm, self).__init__(*args, **kwargs)
         self.fields['wallet_name'].widget.attrs['readonly'] = True
-        selffields['conversation_id'].widget.attrs['readonly'] = True
+        self.fields['conversation_id'].widget.attrs['readonly'] = True
 
 
 class SelectCredentialOfferForm(WalletNameForm):
-    connection_id = forms.IntegerField(label="Connection Id")
+    connection_id = forms.IntegerField(widget=forms.HiddenInput())
+    partner_name = forms.CharField(label='Partner Name', max_length=60)
     cred_def = forms.ModelChoiceField(label='Cred Def', queryset=IndyCredentialDefinition.objects.all())
 
     def __init__(self, *args, **kwargs):
         super(SelectCredentialOfferForm, self).__init__(*args, **kwargs)
         self.fields['wallet_name'].widget.attrs['readonly'] = True
+        self.fields['wallet_name'].widget.attrs['hidden'] = True
         self.fields['connection_id'].widget.attrs['readonly'] = True
+        self.fields['partner_name'].widget.attrs['readonly'] = True
         initial = kwargs.get('initial')
         if initial:
             wallet_name = initial.get('wallet_name')
@@ -118,16 +129,19 @@ class SelectCredentialOfferForm(WalletNameForm):
 
 
 class SendCredentialOfferForm(WalletNameForm):
-    connection_id = forms.IntegerField(label="Connection Id")
-    cred_def = forms.CharField(label='Cred Def', max_length=80)
+    connection_id = forms.IntegerField(widget=forms.HiddenInput())
+    partner_name = forms.CharField(label='Partner Name', max_length=60)
+    cred_def = forms.CharField(max_length=80, widget=forms.HiddenInput())
     credential_name = forms.CharField(label='Credential Name', max_length=80)
-    credential_tag = forms.CharField(label='Credential Tag', max_length=80)
+    credential_tag = forms.CharField(max_length=80, widget=forms.HiddenInput())
     schema_attrs = forms.CharField(label='Credential Attributes', max_length=4000, widget=forms.Textarea)
 
     def __init__(self, *args, **kwargs):
         super(SendCredentialOfferForm, self).__init__(*args, **kwargs)
         self.fields['wallet_name'].widget.attrs['readonly'] = True
+        self.fields['wallet_name'].widget.attrs['hidden'] = True
         self.fields['connection_id'].widget.attrs['readonly'] = True
+        self.fields['partner_name'].widget.attrs['readonly'] = True
         self.fields['cred_def'].widget.attrs['readonly'] = True
         initial = kwargs.get('initial')
         if initial:
@@ -142,9 +156,9 @@ class SendCredentialOfferForm(WalletNameForm):
 class SendCredentialResponseForm(SendConversationResponseForm):
     # a bunch of fields that are read-only to present to the user
     from_partner_name = forms.CharField(label='Partner Name', max_length=60)
-    claim_id = forms.CharField(label='Credential Id', max_length=80)
+    claim_id = forms.CharField(max_length=80, widget=forms.HiddenInput())
     claim_name = forms.CharField(label='Credential Name', max_length=400)
-    libindy_offer_schema_id = forms.CharField(label='Schema Id', max_length=120)
+    libindy_offer_schema_id = forms.CharField(max_length=120, widget=forms.HiddenInput())
     credential_attrs = forms.CharField(label='Credential Attrs', max_length=4000, widget=forms.Textarea)
 
     def __init__(self, *args, **kwargs):
@@ -168,17 +182,21 @@ class SendCredentialResponseForm(SendConversationResponseForm):
 # forms to request, send and receive proofs
 ######################################################################
 class SelectProofRequestForm(WalletNameForm):
-    connection_id = forms.IntegerField(label="Connection Id")
+    connection_id = forms.IntegerField(widget=forms.HiddenInput())
+    partner_name = forms.CharField(label='Partner Name', max_length=60)
     proof_request = forms.ModelChoiceField(label='Proof Request Type', queryset=IndyProofRequest.objects.all())
 
     def __init__(self, *args, **kwargs):
         super(SelectProofRequestForm, self).__init__(*args, **kwargs)
         self.fields['wallet_name'].widget.attrs['readonly'] = True
+        self.fields['wallet_name'].widget.attrs['hidden'] = True
         self.fields['connection_id'].widget.attrs['readonly'] = True
+        self.fields['partner_name'].widget.attrs['readonly'] = True
 
 
 class SendProofRequestForm(WalletNameForm):
-    connection_id = forms.IntegerField(label="Connection Id")
+    connection_id = forms.IntegerField(widget=forms.HiddenInput())
+    partner_name = forms.CharField(label='Partner Name', max_length=60)
     proof_name = forms.CharField(label='Proof Name', max_length=400)
     proof_attrs = forms.CharField(label='Proof Attributes', max_length=4000, widget=forms.Textarea)
     proof_predicates = forms.CharField(label='Proof Predicates', max_length=4000, widget=forms.Textarea)
@@ -186,7 +204,9 @@ class SendProofRequestForm(WalletNameForm):
     def __init__(self, *args, **kwargs):
         super(SendProofRequestForm, self).__init__(*args, **kwargs)
         self.fields['wallet_name'].widget.attrs['readonly'] = True
+        self.fields['wallet_name'].widget.attrs['hidden'] = True
         self.fields['connection_id'].widget.attrs['readonly'] = True
+        self.fields['partner_name'].widget.attrs['readonly'] = True
 
 
 class SendProofReqResponseForm(SendConversationResponseForm):

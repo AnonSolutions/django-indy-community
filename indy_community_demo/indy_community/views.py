@@ -432,6 +432,7 @@ def handle_select_credential_offer(request):
             cd = form.cleaned_data
             connection_id = cd.get('connection_id')
             cred_def = cd.get('cred_def')
+            partner_name = cd.get('partner_name')
 
             credential_name = cred_def.creddef_name
             credential_tag = cred_def.creddef_name
@@ -444,6 +445,7 @@ def handle_select_credential_offer(request):
             schema_attrs = cred_def.creddef_template
             form = SendCredentialOfferForm(initial={ 'connection_id': connection_id,
                                                      'wallet_name': connections[0].wallet.wallet_name,
+                                                     'partner_name': partner_name,
                                                      'cred_def': cred_def.id,
                                                      'schema_attrs': schema_attrs,
                                                      'credential_name': credential_name,
@@ -458,6 +460,7 @@ def handle_select_credential_offer(request):
         connections = AgentConnection.objects.filter(id=connection_id, wallet=wallet).all()
         # TODO validate connection id
         form = SelectCredentialOfferForm(initial={ 'connection_id': connection_id,
+                                                   'partner_name': connections[0].partner_name,
                                                    'wallet_name': connections[0].wallet.wallet_name})
 
         return render(request, 'indy/credential/select_offer.html', {'form': form})
@@ -673,7 +676,7 @@ def handle_proof_select_claims(request):
 
 def poll_conversation_status(request):
     if request.method=='POST':
-        form = SendConversationResponseForm(request.POST)
+        form = PollConversationStatusForm(request.POST)
         if not form.is_valid():
             return render(request, 'indy/form_response.html', {'msg': 'Form error', 'msg_txt': str(form.errors)})
         else:
@@ -710,7 +713,7 @@ def poll_conversation_status(request):
         indy_conversation = json.loads(conversation.conversation_data)
         # TODO validate connection id
         connection = conversation.connection
-        form = SendConversationResponseForm(initial={'conversation_id': conversation_id, 'wallet_name': connection.wallet.wallet_name})
+        form = PollConversationStatusForm(initial={'conversation_id': conversation_id, 'wallet_name': connection.wallet.wallet_name})
 
     return render(request, 'indy/conversation/status.html', {'form': form})
 
@@ -724,6 +727,7 @@ def handle_select_proof_request(request):
             cd = form.cleaned_data
             proof_request = cd.get('proof_request')
             connection_id = cd.get('connection_id')
+            partner_name = cd.get('partner_name')
 
             wallet = wallet_for_current_session(request)
 
@@ -742,6 +746,7 @@ def handle_select_proof_request(request):
             proof_form = SendProofRequestForm(initial={
                     'wallet_name': connection.wallet.wallet_name,
                     'connection_id': connection_id,
+                    'partner_name': partner_name,
                     'proof_name': proof_request.proof_req_name,
                     'proof_attrs': proof_req_attrs,
                     'proof_predicates': proof_req_predicates})
@@ -755,6 +760,7 @@ def handle_select_proof_request(request):
         connections = AgentConnection.objects.filter(id=connection_id, wallet=wallet).all()
         connection = connections[0]
         form = SelectProofRequestForm(initial={ 'connection_id': connection_id,
+                                                'partner_name': connection.partner_name,
                                                 'wallet_name': connection.wallet.wallet_name })
 
         return render(request, 'indy/proof/select_request.html', {'form': form})
