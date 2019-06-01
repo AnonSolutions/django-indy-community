@@ -19,7 +19,7 @@ from .utils import *
 ######################################################################
 def get_user_wallet_name(username):
     """
-    Determine wallet name based on a user name (email)
+    Determine wallet name based on a user name (email).
     """
 
     wallet_name = username.replace("@", "_")
@@ -29,7 +29,7 @@ def get_user_wallet_name(username):
 
 def get_org_wallet_name(orgname):
     """
-    Determine wallet name based on an organization name
+    Determine wallet name based on an organization name.
     """
 
     wallet_name = orgname.replace("@", "_")
@@ -40,7 +40,7 @@ def get_org_wallet_name(orgname):
 
 def create_wallet(wallet_name, raw_password):
     """
-    Create an Indy wallet (postgres)
+    Create an Indy wallet (postgres).
     """
 
     wallet_config_json = wallet_config(wallet_name)
@@ -55,7 +55,7 @@ def create_wallet(wallet_name, raw_password):
 
 def delete_wallet(wallet_name, raw_password):
     """
-    Delete an Indy wallet (postgres)
+    Delete an Indy wallet (postgres).
     """
 
     wallet_config_json = wallet_config(wallet_name)
@@ -69,7 +69,7 @@ def delete_wallet(wallet_name, raw_password):
 
 def open_wallet(wallet_name, raw_password):
     """
-    Open an Indy wallet (postgres)
+    Open an Indy wallet (postgres).
     """
 
     wallet_config_json = wallet_config(wallet_name)
@@ -83,7 +83,7 @@ def open_wallet(wallet_name, raw_password):
 
 def close_wallet(wallet_handle):
     """
-    Close an Indy wallet (postgres)
+    Close an Indy wallet (postgres).
     """
 
     try:
@@ -95,7 +95,7 @@ def close_wallet(wallet_handle):
 
 def wallet_config(wallet_name):
     """
-    Build a wallet configuration dictionary (postgres specific)
+    Build a wallet configuration dictionary (postgres specific).
     """
 
     storage_config = settings.INDY_CONFIG['storage_config']
@@ -108,7 +108,7 @@ def wallet_config(wallet_name):
 
 def wallet_credentials(raw_password):
     """
-    Build wallet credentials dictionary (postgres specific)
+    Build wallet credentials dictionary (postgres specific).
     """
 
     storage_credentials = settings.INDY_CONFIG['storage_credentials']
@@ -120,6 +120,10 @@ def wallet_credentials(raw_password):
 
 
 def list_wallet_credentials(wallet):
+    """
+    List all credentials in the current wallet.
+    """
+
     # for now, we have our secret password in our wallet config
     wallet_name = wallet.wallet_name
     wallet_config = json.loads(wallet.wallet_config)

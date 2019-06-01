@@ -122,6 +122,8 @@ class SelectCredentialOfferForm(WalletNameForm):
         self.fields['wallet_name'].widget.attrs['hidden'] = True
         self.fields['connection_id'].widget.attrs['readonly'] = True
         self.fields['partner_name'].widget.attrs['readonly'] = True
+
+        # build a list of Credential Definitions available to the current wallet
         initial = kwargs.get('initial')
         if initial:
             wallet_name = initial.get('wallet_name')
@@ -143,6 +145,8 @@ class SendCredentialOfferForm(WalletNameForm):
         self.fields['connection_id'].widget.attrs['readonly'] = True
         self.fields['partner_name'].widget.attrs['readonly'] = True
         self.fields['cred_def'].widget.attrs['readonly'] = True
+
+        # build a list of attributes for the given schema
         initial = kwargs.get('initial')
         if initial:
             schema_attrs = initial.get('schema_attrs', '{}')
@@ -168,6 +172,8 @@ class SendCredentialResponseForm(SendConversationResponseForm):
         self.fields['claim_name'].widget.attrs['readonly'] = True
         self.fields['libindy_offer_schema_id'].widget.attrs['readonly'] = True
         self.fields['credential_attrs'].widget.attrs['readonly'] = True
+
+        # build a list of attributes for the current schema
         initial = kwargs.get('initial')
         if initial:
             credential_attrs = initial.get('credential_attrs', {})
@@ -225,6 +231,8 @@ class SelectProofReqClaimsForm(SendProofReqResponseForm):
 
     def __init__(self, *args, **kwargs):
         super(SelectProofReqClaimsForm, self).__init__(*args, **kwargs)
+
+        # list requested attributes and the available claims, for the user to select
         initial = kwargs.get('initial')
         if initial:
             field_attrs = initial.get('requested_attrs', '{}')

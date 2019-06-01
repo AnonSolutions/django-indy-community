@@ -1,2 +1,2 @@
-django-indy-community~=0.1.12
+django-indy-community~=0.1.13
 

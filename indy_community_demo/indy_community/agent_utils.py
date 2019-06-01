@@ -35,8 +35,9 @@ DUMMY_SEED = "00000000000000000000000000000000"
 ######################################################################
 def vcx_provision_config(wallet_name, raw_password, institution_name, did_seed=None, org_role='', institution_logo_url='http://robohash.org/456'):
     """
-    Build a configuration objects for a VCX environment or agent
+    Build a configuration object for a VCX environment or agent
     """
+
     provisionConfig = {
         'agency_url': settings.INDY_CONFIG['vcx_agency_url'],
         'agency_did': settings.INDY_CONFIG['vcx_agency_did'],
@@ -65,6 +66,10 @@ def vcx_provision_config(wallet_name, raw_password, institution_name, did_seed=N
 
 
 def initialize_and_provision_vcx(wallet_name, raw_password, institution_name, did_seed=None, org_role='', institution_logo_url='http://robohash.org/456'):
+    """
+    Provision a wallet as a VCX Agent.
+    """
+
     provisionConfig = vcx_provision_config(wallet_name, raw_password, institution_name, did_seed=did_seed, org_role=org_role, institution_logo_url=institution_logo_url)
 
     print(" >>> Provision an agent and wallet, get back configuration details")
@@ -102,9 +107,10 @@ def initialize_and_provision_vcx(wallet_name, raw_password, institution_name, di
 
 def create_schema_json(schema_name, schema_version, schema_attrs):
     """
-    Create a schema object based on a list of attributes
-    Returns the schema as well as a template for creating credentials
+    Create an Indy Schema object based on a list of attributes.
+    Returns the schema as well as a template for creating credentials.
     """
+
     schema = {
         'name': schema_name,
         'version': schema_version,
@@ -117,11 +123,11 @@ def create_schema_json(schema_name, schema_version, schema_attrs):
     return (json.dumps(schema), json.dumps(creddef_template))
 
 
-# TODO for now just create a random schema and creddef
 def create_schema(wallet, schema_json, schema_template, initialize_vcx=True):
     """
-    Create a schema (VCX) and also store in our local database
+    Create an Indy Schema (VCX) and also store in our local database.
     """
+
     if initialize_vcx:
         try:
             config_json = wallet.wallet_config
@@ -157,11 +163,11 @@ def create_schema(wallet, schema_json, schema_template, initialize_vcx=True):
     return indy_schema
 
 
-# TODO for now just create a random schema and creddef
 def create_creddef(wallet, indy_schema, creddef_name, creddef_template, initialize_vcx=True):
     """
-    Create a credential definition (VCX) and also store in our local database
+    Create an Indy Credential Definition (VCX) and also store in our local database
     """
+
     # wallet specific-configuration for creatig the cred def
     if initialize_vcx:
         try:
@@ -201,8 +207,9 @@ def create_creddef(wallet, indy_schema, creddef_name, creddef_template, initiali
 
 def create_proof_request(name, description, attrs, predicates):
     """
-    Create a proof request template (local database only)
+    Create a proof request template (local database only).
     """
+
     proof_req_attrs = json.dumps(attrs)
     proof_req_predicates = json.dumps(predicates)
     proof_request = IndyProofRequest(
@@ -221,6 +228,11 @@ def create_proof_request(name, description, attrs, predicates):
 ######################################################################
 
 def send_connection_invitation(wallet, partner_name, initialize_vcx=True):
+    """
+    Create a VCX Connection Invitation.
+    Creates a record for the initator only (receiver is checked in the corresponding view).
+    """
+
     if initialize_vcx:
         try:
             config_json = wallet.wallet_config
@@ -261,6 +273,10 @@ def send_connection_invitation(wallet, partner_name, initialize_vcx=True):
 
 
 def send_connection_confirmation(wallet, connection_id, partner_name, invite_details, initialize_vcx=True):
+    """
+    Send a confirmation message for a VCX Invitation.
+    """
+
     if initialize_vcx:
         try:
             config_json = wallet.wallet_config
@@ -308,6 +324,12 @@ def send_connection_confirmation(wallet, connection_id, partner_name, invite_det
 
 
 def check_connection_status(wallet, connection, initialize_vcx=True):
+    """
+    Check status of the Connection.
+    Called when an invitation has been sent and confirmation has not yet been received.
+    Called from the Django background task, but can also be called from a view directly.
+    """
+
     if initialize_vcx:
         try:
             config_json = wallet.wallet_config
@@ -354,6 +376,10 @@ def check_connection_status(wallet, connection, initialize_vcx=True):
 ######################################################################
 
 def send_credential_offer(wallet, connection, credential_tag, schema_attrs, cred_def, credential_name, initialize_vcx=True):
+    """
+    Send a VCX Credential Offer.
+    """
+
     if initialize_vcx:
         try:
             config_json = wallet.wallet_config
@@ -395,6 +421,10 @@ def send_credential_offer(wallet, connection, credential_tag, schema_attrs, cred
     
 
 def send_credential_request(wallet, connection, conversation, initialize_vcx=True):
+    """
+    Respond to a Credential Offer by sending a VCX Credentia Request.
+    """
+
     if initialize_vcx:
         try:
             config_json = wallet.wallet_config
@@ -436,6 +466,10 @@ def send_credential_request(wallet, connection, conversation, initialize_vcx=Tru
 ######################################################################
 
 def send_proof_request(wallet, connection, proof_uuid, proof_name, proof_attrs, proof_predicates, initialize_vcx=True):
+    """
+    Send a VCX Proof Request.
+    """
+
     if initialize_vcx:
         try:
             config_json = wallet.wallet_config
@@ -479,6 +513,11 @@ def send_proof_request(wallet, connection, proof_uuid, proof_name, proof_attrs, 
 # note additional filters are exact match only (attr=value) to filter the allowable claims
 # required temporarily because vcx doesn't support the additional filters allowed by indy-sdk
 def get_claims_for_proof_request(wallet, connection, my_conversation, additional_filters=None, initialize_vcx=True):
+    """
+    For the receiver of the Proof Request (i.e. Prover) find the set of claims that can be used
+    to construct a Proof.
+    """
+
     if initialize_vcx:
         try:
             config_json = wallet.wallet_config
@@ -528,12 +567,20 @@ def get_claims_for_proof_request(wallet, connection, my_conversation, additional
 
 
 def cred_for_referent(creds_for_proof, attr, schema_id):
+    """
+    Find the credential for te given referent (i.e. credential id).
+    """
+
     for cred in creds_for_proof['attrs'][attr]:
         if schema_id == cred['cred_info']['referent']:
             return cred
     return None
 
 def send_claims_for_proof_request(wallet, connection, my_conversation, credential_attrs, initialize_vcx=True):
+    """
+    Construct a Proof with the given set of claims and send the Proof.
+    """
+
     if initialize_vcx:
         try:
             config_json = wallet.wallet_config
@@ -591,6 +638,11 @@ def send_claims_for_proof_request(wallet, connection, my_conversation, credentia
 ######################################################################
 
 def handle_inbound_messages(my_wallet, my_connection):
+    """
+    Background task to check for inbound messages.
+    Can also be called directly from a view.
+    """
+
     try:
         config_json = my_wallet.wallet_config
         run_coroutine_with_args(vcx_init_with_config, config_json)
@@ -650,6 +702,11 @@ def handle_inbound_messages(my_wallet, my_connection):
 
 
 def poll_message_conversation(my_wallet, my_connection, message, initialize_vcx=True):
+    """
+    Background task to poll for updates to in-progress Conversations.
+    Can also be called directly from a view.
+    """
+
     if initialize_vcx:
         try:
             config_json = my_wallet.wallet_config
@@ -755,6 +812,11 @@ def poll_message_conversation(my_wallet, my_connection, message, initialize_vcx=
 
 
 def poll_message_conversations(my_wallet, my_connection):
+    """
+    Background task to poll all Conversations for updates.
+    Can also be called directly from a view.
+    """
+
     try:
         config_json = my_wallet.wallet_config
         run_coroutine_with_args(vcx_init_with_config, config_json)
@@ -787,15 +849,27 @@ def poll_message_conversations(my_wallet, my_connection):
 ######################################################################
 
 def conversation_callback(conversation, prev_type, prev_status):
+    """
+    Placeholder callback function for Conversation events.
+    Override in your application.
+    """
     print("conversation callback", prev_type, prev_status, conversation.conversation_type, conversation.status)
 
 def connection_callback(connection, prev_status):
+    """
+    Placeholder callback function for Connection events.
+    Override in your application.
+    """
     print("connection callback", prev_status, connection.status)
 
 
 import importlib
 
 def check_conversation_callback(message, prev_type, prev_status):
+    """
+    Checks for an application-defined callback for Conversation events and calls it.
+    """
+
     callback_function = getattr(settings, 'INDY_CONVERSATION_CALLBACK', None)
     if callback_function:
         mod_name, func_name = callback_function.rsplit('.',1)
@@ -805,6 +879,10 @@ def check_conversation_callback(message, prev_type, prev_status):
         func(message, prev_type, prev_status)
 
 def check_connection_callback(connection, prev_status):
+    """
+    Checks for an application-defined callback for Connection events and calls it.
+    """
+
     callback_function = getattr(settings, 'INDY_CONNECTION_CALLBACK', None)
     if callback_function:
         mod_name, func_name = callback_function.rsplit('.',1)

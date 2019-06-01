@@ -6,7 +6,7 @@ Indy Community is a simple Django framework for building
 Hyperledger Indy Agent enabled web applications.
 Detailed documentation is in the "docs" directory.
 
-Please see https://github.com/AnonSolutions/django-indy-community for details docmentation
+Please see https://github.com/AnonSolutions/django-indy-community for detailed docmentation
 
 
 Quick start
@@ -23,6 +23,7 @@ To add indy_community to your own django application:
 .. code-block:: python
 
         INSTALLED_APPS = [
+            # this should go first
             'indy_community.apps.IndyCoreConfig',
             ...
         ]
@@ -111,6 +112,8 @@ To add indy_community to your own django application:
 
 10. Run `python manage.py runserver` and connect to http://localhost:8000/indy`
 
+You can customize the UI and add event handling for VCX Connection and Messaging events.  See the demos in
+https://github.com/AnonSolutions/indy-community-demo for examples of how to do this.
 
 View detailed documentation in the Docs directory (https://github.com/AnonSolutions/django-indy-community)
 
