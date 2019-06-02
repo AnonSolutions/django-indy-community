@@ -22,7 +22,17 @@ ORG_ROLE = getattr(settings, "DEFAULT_ORG_ROLE", 'Admin')
 ###############################################################
 # UI views to support user and organization registration
 ###############################################################
-def mobile_request_connection(request):
+def mobile_request_connection(
+    request,
+    form_template='registration/request_mobile_connection.html',
+    response_template='registration/mobile_connection_info.html'
+    ):
+    """
+    Create an invitation for a user who will use a mobile wallet.
+    No managed wallet is created.  A login account is created but many of the built-in screens
+    won't work due to the missing wallet.
+    """
+
     # user requests mobile connection to an org
     if request.method == 'POST':
         # generate ivitation and display a QR code
@@ -72,8 +82,16 @@ def mobile_request_connection(request):
         form = RequestMobileConnectionForm(initial={})
         return render(request, 'registration/request_mobile_connection.html', {'form': form})
 
+
 # Sign up as a site user, and create a wallet
-def user_signup_view(request):
+def user_signup_view(
+    request,
+    template=''
+    ):
+    """
+    Create a user account with a managed wallet.
+    """
+
     if request.method == 'POST':
         form = UserSignUpForm(request.POST)
         if form.is_valid():
@@ -99,7 +117,15 @@ def user_signup_view(request):
 
 
 # Sign up as an org user, and create a wallet
-def org_signup_view(request):
+def org_signup_view(
+    request,
+    template=''
+    ):
+    """
+    Signup an Organization with a managed wallet.
+    Creates a user account and links to the Organization.
+    """
+
     if request.method == 'POST':
         form = OrganizationSignUpForm(request.POST)
         if form.is_valid():
@@ -136,6 +162,7 @@ def wallet_for_current_session(request):
     """
     Determine the current active wallet
     """
+
     wallet_name = request.session['wallet_name']
     wallet = IndyWallet.objects.filter(wallet_name=wallet_name).first()
 
@@ -160,18 +187,42 @@ def wallet_for_current_session(request):
 ###############################################################
 # UI views to support wallet and agent UI functions
 ###############################################################
-def profile_view(request):
+def profile_view(
+    request,
+    template=''
+    ):
+    """
+    Example of user-defined view for Profile tab.
+    """
     return render(request, 'indy/profile.html')
 
-def data_view(request):
+def data_view(
+    request,
+    template=''
+    ):
+    """
+    Example of user-defined view for Data tab.
+    """
     return render(request, 'indy/data.html')
 
-def wallet_view(request):
+def wallet_view(
+    request,
+    template=''
+    ):
+    """
+    Example of user-defined view for Wallet tab.
+    """
     return render(request, 'indy/wallet.html')
+
 
 import importlib
 
 def plugin_view(request, view_name):
+    """
+    Find and invoke user-defined view.
+    These are configured in settings file.
+    """
+
     view_function = getattr(settings, view_name)
     print(view_function)
 
@@ -185,14 +236,29 @@ def plugin_view(request, view_name):
 ######################################################################
 # views to create and confirm agent-to-agent connections
 ######################################################################
-def list_connections(request):
+def list_connections(
+    request,
+    template='indy/connection/list.html'
+    ):
+    """
+    List Connections for the current wallet.
+    """
+
     # expects a wallet to be opened in the current session
     wallet = wallet_for_current_session(request)
     connections = AgentConnection.objects.filter(wallet=wallet).all()
-    return render(request, 'indy/connection/list.html', {'wallet_name': wallet.wallet_name, 'connections': connections})
+    return render(request, template, {'wallet_name': wallet.wallet_name, 'connections': connections})
 
 
-def handle_connection_request(request):
+def handle_connection_request(
+    request,
+    form_template='indy/connection/request.html',
+    response_template='indy/connection/form_connection_info.html'
+    ):
+    """
+    Send a Connection request (i.e. an Invitation).
+    """
+
     if request.method=='POST':
         form = SendConnectionInvitationForm(request.POST)
         if not form.is_valid():
@@ -239,20 +305,28 @@ def handle_connection_request(request):
                     source_name = my_connection.wallet.wallet_user.get().email
                 target_name = my_connection.partner_name
                 institution_logo_url = 'https://anon-solutions.ca/favicon.ico'
-                return render(request, 'indy/connection/form_connection_info.html', {'msg': 'Updated connection for ' + wallet.wallet_name, 'msg_txt': my_connection.invitation, 'msg_txt2': my_connection.token, 'msg_txt3': my_connection.invitation_shortform(source_name, target_name, institution_logo_url) })
+                return render(request, response_template, {'msg': 'Created invitation for ' + target_name, 'msg_txt': my_connection.invitation, 'msg_txt2': my_connection.token, 'msg_txt3': my_connection.invitation_shortform(source_name, target_name, institution_logo_url) })
             except IndyError:
                 # ignore errors for now
                 print(" >>> Failed to create request for", wallet.wallet_name)
-                return render(request, 'indy/form_response.html', {'msg': 'Failed to create request for ' + wallet.wallet_name})
+                return render(request, 'indy/form_response.html', {'msg': 'Failed to create invitation for ' + wallet.wallet_name})
 
     else:
         wallet = wallet_for_current_session(request)
         form = SendConnectionInvitationForm(initial={'wallet_name': wallet.wallet_name})
 
-        return render(request, 'indy/connection/request.html', {'form': form})
+        return render(request, form_template, {'form': form})
     
 
-def handle_connection_response(request):
+def handle_connection_response(
+    request,
+    form_template='indy/connection/response.html',
+    response_template='indy/form_response.html'
+    ):
+    """
+    Respond to (Accept) a Connection request.
+    """
+
     if request.method=='POST':
         form = SendConnectionResponseForm(request.POST)
         if not form.is_valid():
@@ -273,7 +347,7 @@ def handle_connection_response(request):
             try:
                 my_connection = send_connection_confirmation(wallet, connection_id, partner_name, invitation_details)
 
-                return render(request, 'indy/form_response.html', {'msg': 'Updated connection for ' + wallet.wallet_name})
+                return render(request, response_template, {'msg': 'Updated connection for ' + wallet.wallet_name})
             except IndyError:
                 # ignore errors for now
                 print(" >>> Failed to update request for", wallet.wallet_name)
@@ -295,10 +369,18 @@ def handle_connection_response(request):
             wallet = wallet_for_current_session(request)
             form = SendConnectionResponseForm(initial={'connection_id': 0, 'wallet_name': wallet.wallet_name})
 
-        return render(request, 'indy/connection/response.html', {'form': form})
+        return render(request, form_template, {'form': form})
     
 
-def poll_connection_status(request):
+def poll_connection_status(
+    request,
+    form_template='indy/connection/status.html',
+    response_template='indy/form_response.html'
+    ):
+    """
+    Poll Connection status (normally a background task).
+    """
+
     if request.method=='POST':
         form = PollConnectionStatusForm(request.POST)
         if not form.is_valid():
@@ -321,7 +403,7 @@ def poll_connection_status(request):
             try:
                 my_connection = check_connection_status(wallet, my_connection)
 
-                return render(request, 'indy/form_response.html', {'msg': 'Updated connection for ' + wallet.wallet_name + ', ' + my_connection.partner_name})
+                return render(request, response_template, {'msg': 'Updated connection for ' + wallet.wallet_name + ', ' + my_connection.partner_name})
             except IndyError:
                 # ignore errors for now
                 print(" >>> Failed to update request for", wallet.wallet_name)
@@ -336,10 +418,17 @@ def poll_connection_status(request):
         form = PollConnectionStatusForm(initial={ 'connection_id': connection_id,
                                                   'wallet_name': connections[0].wallet.wallet_name })
 
-        return render(request, 'indy/connection/status.html', {'form': form})
+        return render(request, form_template, {'form': form})
 
 
-def connection_qr_code(request, token):
+def connection_qr_code(
+    request, 
+    token
+    ):
+    """
+    Display a QR code for the given invitation.
+    """
+
     # find connection for requested token
     connections = AgentConnection.objects.filter(token=token, connection_type='Outbound').all()
     if 0 == len(connections):
@@ -362,7 +451,7 @@ def connection_qr_code(request, token):
         institution_logo_url = 'http://robohash.org/456'
     qr = pyqrcode.create(connection.invitation_shortform(source_name, target_name, institution_logo_url))
     path_to_image = '/tmp/'+token+'qr-offer.png'
-    qr.png(path_to_image, scale=4, module_color=[0, 0, 0, 128], background=[0xff, 0xff, 0xcc])
+    qr.png(path_to_image, scale=2, module_color=[0, 0, 0, 128], background=[0xff, 0xff, 0xff])
     image_data = open(path_to_image, "rb").read()
 
     # serialize to HTTP response
@@ -374,7 +463,15 @@ def connection_qr_code(request, token):
 ######################################################################
 # views to offer, request, send and receive credentials
 ######################################################################
-def check_connection_messages(request):
+def check_connection_messages(
+    request,
+    form_template='indy/connection/check_messages.html',
+    response_template='indy/form_response.html'
+    ):
+    """
+    Poll Connections for outstanding messages (normally a background task).
+    """
+
     if request.method=='POST':
         form = PollConnectionStatusForm(request.POST)
         if not form.is_valid():
@@ -398,7 +495,7 @@ def check_connection_messages(request):
                     msg_count = handle_inbound_messages(wallet, connection)
                     total_count = total_count + msg_count
 
-            return render(request, 'indy/form_response.html', {'msg': 'Received message count = ' + str(total_count)})
+            return render(request, response_template, {'msg': 'Received message count = ' + str(total_count)})
 
     else:
         # find connection request
@@ -413,17 +510,32 @@ def check_connection_messages(request):
         form = PollConnectionStatusForm(initial={ 'connection_id': connection_id,
                                                   'wallet_name': connections[0].wallet.wallet_name })
 
-        return render(request, 'indy/connection/check_messages.html', {'form': form})
+        return render(request, form_template, {'form': form})
 
 
-def list_conversations(request):
+def list_conversations(
+    request,
+    template='indy/conversation/list.html'
+    ):
+    """
+    List Conversations for the current wallet.
+    """
+
     # expects a wallet to be opened in the current session
     wallet = wallet_for_current_session(request)
     conversations = AgentConversation.objects.filter(connection__wallet=wallet).all()
-    return render(request, 'indy/conversation/list.html', {'wallet_name': wallet.wallet_name, 'conversations': conversations})
+    return render(request, template, {'wallet_name': wallet.wallet_name, 'conversations': conversations})
 
 
-def handle_select_credential_offer(request):
+def handle_select_credential_offer(
+    request,
+    form_template='indy/credential/select_offer.html',
+    response_template='indy/credential/offer.html'
+    ):
+    """
+    Select a Credential Definition and display a form to enter Credential Offer information.
+    """
+
     if request.method=='POST':
         form = SelectCredentialOfferForm(request.POST)
         if not form.is_valid():
@@ -432,6 +544,7 @@ def handle_select_credential_offer(request):
             cd = form.cleaned_data
             connection_id = cd.get('connection_id')
             cred_def = cd.get('cred_def')
+            partner_name = cd.get('partner_name')
 
             credential_name = cred_def.creddef_name
             credential_tag = cred_def.creddef_name
@@ -444,12 +557,13 @@ def handle_select_credential_offer(request):
             schema_attrs = cred_def.creddef_template
             form = SendCredentialOfferForm(initial={ 'connection_id': connection_id,
                                                      'wallet_name': connections[0].wallet.wallet_name,
+                                                     'partner_name': partner_name,
                                                      'cred_def': cred_def.id,
                                                      'schema_attrs': schema_attrs,
                                                      'credential_name': credential_name,
                                                      'credential_tag': credential_tag })
 
-            return render(request, 'indy/credential/offer.html', {'form': form})
+            return render(request, response_template, {'form': form})
 
     else:
         # find conversation request
@@ -458,12 +572,20 @@ def handle_select_credential_offer(request):
         connections = AgentConnection.objects.filter(id=connection_id, wallet=wallet).all()
         # TODO validate connection id
         form = SelectCredentialOfferForm(initial={ 'connection_id': connection_id,
+                                                   'partner_name': connections[0].partner_name,
                                                    'wallet_name': connections[0].wallet.wallet_name})
 
-        return render(request, 'indy/credential/select_offer.html', {'form': form})
+        return render(request, form_template, {'form': form})
 
 
-def handle_credential_offer(request):
+def handle_credential_offer(
+    request,
+    template='indy/form_response.html'
+    ):
+    """
+    Send a Credential Offer.
+    """
+
     if request.method=='POST':
         form = SendCredentialOfferForm(request.POST)
         if not form.is_valid():
@@ -498,7 +620,7 @@ def handle_credential_offer(request):
             try:
                 my_conversation = send_credential_offer(wallet, my_connection, credential_tag, json.loads(schema_attrs), cred_def, credential_name)
 
-                return render(request, 'indy/form_response.html', {'msg': 'Updated conversation for ' + wallet.wallet_name})
+                return render(request, template, {'msg': 'Updated conversation for ' + wallet.wallet_name})
             except IndyError:
                 # ignore errors for now
                 print(" >>> Failed to update conversation for", wallet.wallet_name)
@@ -508,7 +630,15 @@ def handle_credential_offer(request):
         return render(request, 'indy/form_response.html', {'msg': 'Method not allowed'})
 
 
-def handle_cred_offer_response(request):
+def handle_cred_offer_response(
+    request,
+    form_template='indy/credential/offer_response.html',
+    response_template='indy/form_response.html'
+    ):
+    """
+    Respond to a Credential Offer by sending a Credential Request.
+    """
+
     if request.method=='POST':
         form = SendCredentialResponseForm(request.POST)
         if not form.is_valid():
@@ -529,7 +659,7 @@ def handle_cred_offer_response(request):
             try:
                 my_conversation = send_credential_request(wallet, my_connection, my_conversation)
 
-                return render(request, 'indy/form_response.html', {'msg': 'Updated conversation for ' + wallet.wallet_name})
+                return render(request, response_template, {'msg': 'Updated conversation for ' + wallet.wallet_name})
             except IndyError:
                 # ignore errors for now
                 print(" >>> Failed to update conversation for", wallet.wallet_name)
@@ -555,13 +685,21 @@ def handle_cred_offer_response(request):
                                                  'libindy_offer_schema_id': json.loads(indy_conversation['libindy_offer'])['schema_id']
                                                 })
 
-        return render(request, 'indy/credential/offer_response.html', {'form': form})
+        return render(request, form_template, {'form': form})
 
 
 ######################################################################
 # views to request, send and receive proofs
 ######################################################################
-def handle_proof_req_response(request):
+def handle_proof_req_response(
+    request,
+    form_template='indy/proof/send_response.html',
+    response_template='indy/proof/select_claims.html'
+    ):
+    """
+    First stage in responding to a Proof Request - confirm to search for claims.
+    """
+
     if request.method=='POST':
         form = SendProofReqResponseForm(request.POST)
         if not form.is_valid():
@@ -592,7 +730,7 @@ def handle_proof_req_response(request):
                          'requested_attrs': claim_data,
                     })
 
-                return render(request, 'indy/proof/select_claims.html', {'form': form})
+                return render(request, response_template, {'form': form})
             except IndyError:
                 # ignore errors for now
                 print(" >>> Failed to find claims for", wallet.wallet_name)
@@ -615,10 +753,17 @@ def handle_proof_req_response(request):
                                                  'proof_req_name': indy_conversation['proof_request_data']['name'],
                                                 })
 
-    return render(request, 'indy/proof/send_response.html', {'form': form})
+    return render(request, form_template, {'form': form})
 
 
-def handle_proof_select_claims(request):
+def handle_proof_select_claims(
+    request,
+    template='indy/form_response.html'
+    ):
+    """
+    Select claims to construct Proof for Proof Request.
+    """
+
     if request.method=='POST':
         form = SelectProofReqClaimsForm(request.POST)
         if not form.is_valid():
@@ -661,7 +806,7 @@ def handle_proof_select_claims(request):
             try:
                 proof_data = send_claims_for_proof_request(wallet, my_connection, my_conversation, credential_attrs)
 
-                return render(request, 'indy/form_response.html', {'msg': 'Sent proof request for ' + wallet.wallet_name})
+                return render(request, template, {'msg': 'Sent proof request for ' + wallet.wallet_name})
             except IndyError:
                 # ignore errors for now
                 print(" >>> Failed to find claims for", wallet.wallet_name)
@@ -671,9 +816,17 @@ def handle_proof_select_claims(request):
         return render(request, 'indy/form_response.html', {'msg': 'Method not allowed'})
 
 
-def poll_conversation_status(request):
+def poll_conversation_status(
+    request,
+    form_template='indy/conversation/status.html',
+    response_template='indy/form_response.html'
+    ):
+    """
+    Poll Conversation status (normally a background task).
+    """
+
     if request.method=='POST':
-        form = SendConversationResponseForm(request.POST)
+        form = PollConversationStatusForm(request.POST)
         if not form.is_valid():
             return render(request, 'indy/form_response.html', {'msg': 'Form error', 'msg_txt': str(form.errors)})
         else:
@@ -694,7 +847,7 @@ def poll_conversation_status(request):
             try:
                 polled_count = poll_message_conversation(wallet, my_connection, my_conversation)
 
-                return render(request, 'indy/form_response.html', {'msg': 'Updated conversation for ' + wallet.wallet_name})
+                return render(request, response_template, {'msg': 'Updated conversation for ' + wallet.wallet_name})
             except IndyError:
                 # ignore errors for now
                 print(" >>> Failed to update conversation for", wallet.wallet_name)
@@ -710,12 +863,20 @@ def poll_conversation_status(request):
         indy_conversation = json.loads(conversation.conversation_data)
         # TODO validate connection id
         connection = conversation.connection
-        form = SendConversationResponseForm(initial={'conversation_id': conversation_id, 'wallet_name': connection.wallet.wallet_name})
+        form = PollConversationStatusForm(initial={'conversation_id': conversation_id, 'wallet_name': connection.wallet.wallet_name})
 
-    return render(request, 'indy/conversation/status.html', {'form': form})
+    return render(request, form_template, {'form': form})
 
 
-def handle_select_proof_request(request):
+def handle_select_proof_request(
+    request,
+    form_template='indy/proof/select_request.html',
+    response_template='indy/proof/send_request.html'
+    ):
+    """
+    Select a Proof Request to send, based on the templates available in the database.
+    """
+
     if request.method=='POST':
         form = SelectProofRequestForm(request.POST)
         if not form.is_valid():
@@ -724,6 +885,7 @@ def handle_select_proof_request(request):
             cd = form.cleaned_data
             proof_request = cd.get('proof_request')
             connection_id = cd.get('connection_id')
+            partner_name = cd.get('partner_name')
 
             wallet = wallet_for_current_session(request)
 
@@ -742,11 +904,12 @@ def handle_select_proof_request(request):
             proof_form = SendProofRequestForm(initial={
                     'wallet_name': connection.wallet.wallet_name,
                     'connection_id': connection_id,
+                    'partner_name': partner_name,
                     'proof_name': proof_request.proof_req_name,
                     'proof_attrs': proof_req_attrs,
                     'proof_predicates': proof_req_predicates})
 
-            return render(request, 'indy/proof/send_request.html', {'form': proof_form})
+            return render(request, response_template, {'form': proof_form})
 
     else:
         # find conversation request
@@ -755,12 +918,21 @@ def handle_select_proof_request(request):
         connections = AgentConnection.objects.filter(id=connection_id, wallet=wallet).all()
         connection = connections[0]
         form = SelectProofRequestForm(initial={ 'connection_id': connection_id,
+                                                'partner_name': connection.partner_name,
                                                 'wallet_name': connection.wallet.wallet_name })
 
-        return render(request, 'indy/proof/select_request.html', {'form': form})
+        return render(request, form_template, {'form': form})
 
 
-def handle_send_proof_request(request):
+def handle_send_proof_request(
+    request,
+    template='indy/form_response.html'
+    ):
+    """
+    Send a Proof Request for the selected Proof Request.
+    User can edit the requested attributes and predicates.
+    """
+
     if request.method=='POST':
         form = SendProofRequestForm(request.POST)
         if not form.is_valid():
@@ -786,7 +958,7 @@ def handle_send_proof_request(request):
             try:
                 my_conversation = send_proof_request(wallet, my_connection, proof_uuid, proof_name, json.loads(proof_attrs), json.loads(proof_predicates))
 
-                return render(request, 'indy/form_response.html', {'msg': 'Updated conversation for ' + wallet.wallet_name})
+                return render(request, template, {'msg': 'Updated conversation for ' + wallet.wallet_name})
             except IndyError:
                 # ignore errors for now
                 print(" >>> Failed to update conversation for", wallet.wallet_name)
@@ -796,25 +968,42 @@ def handle_send_proof_request(request):
         return render(request, 'indy/form_response.html', {'msg': 'Method not allowed'})
 
 
-def handle_view_proof(request):
+def handle_view_proof(
+    request,
+    template='indy/proof/view_proof.html'
+    ):
+    """
+    View the Proof sent by the Prover.
+    """
+
     wallet = wallet_for_current_session(request)
     conversation_id = request.GET.get('conversation_id', None)
     conversations = AgentConversation.objects.filter(id=conversation_id, connection__wallet=wallet).all()
     # TODO validate conversation id
     conversation = conversations[0]
-    return render(request, 'indy/proof/view_proof.html', {'conversation': json.loads(conversation.conversation_data)})
+    return render(request, template, {'conversation': json.loads(conversation.conversation_data)})
 
 
 ######################################################################
 # views to list wallet credentials
 ######################################################################
 def form_response(request):
+    """
+    Generic response page.
+    """
+
     msg = request.GET.get('msg', None)
     msg_txt = request.GET.get('msg_txt', None)
     return render(request, 'indy/form_response.html', {'msg': msg, 'msg_txt': msg_txt})
 
 
-def list_wallet_credentials(request):
+def list_wallet_credentials(
+    request
+    ):
+    """
+    List all credentials in the current wallet.
+    """
+
     wallet_handle = None
     try:
         wallet = wallet_for_current_session(request)

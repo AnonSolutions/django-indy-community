@@ -10,6 +10,7 @@ def user_provision(user, raw_password):
     """
     Create a new user wallet and associate with the user
     """
+
     wallet_name = get_user_wallet_name(user.email)
     res = create_wallet(wallet_name, raw_password)
     if res != 0:
@@ -31,6 +32,7 @@ def org_provision(org, raw_password, org_role=None):
     """
     Create a new org wallet and associate to the org
     """
+
     wallet_name = get_org_wallet_name(org.org_name)
     res = create_wallet(wallet_name, raw_password)
     if res != 0:
@@ -63,6 +65,7 @@ def org_signup(user, raw_password, org_name, org_attrs={}, org_relation_attrs={}
     """
     Helper method to create and provision a new org, and associate to the current user
     """
+    
     if not org_ico_url:
         org_ico_url = 'http://robohash.org/456'
 

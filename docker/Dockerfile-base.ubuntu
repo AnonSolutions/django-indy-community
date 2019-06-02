@@ -74,8 +74,8 @@ RUN mkdir rocksdb && \
     cp -a /usr/local/lib/librocksdb.so* "$HOME/.local/lib" && \
     rm -rf rocksdb
 
-# 3.5.3+ required
-ARG python_version=3.5.5
+# 3.6.3+ required
+ARG python_version=3.6.5
 
 # Install pyenv and python to user home directory
 ENV PYENV_ROOT="$HOME/.pyenv"

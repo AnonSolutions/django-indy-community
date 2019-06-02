@@ -43,6 +43,7 @@
         		        {% endif %}
         		        {% if connection.status == 'Sent' %}
         		            <a href="{% url 'check_connection' %}?id={{connection.id}}">Check Status</a>
+                            <a href="{% url 'connection_qr' token=connection.token %}"}>Mobile QR</a>
         		        {% endif %}
                         {% if connection.status == 'Active' %}
                           {% if connection.connection_type == 'Outbound' %}

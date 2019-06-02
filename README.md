@@ -2,7 +2,7 @@
 
 Django wrapper for a cloud-based Hyperledger Indy Agency for community applications.
 
-This library provides a cloud-based framework for developing Hyperledger Indy Agent applications.  This platform supports agents for both individuals and organizations in a single platform, as well as provides the ability to interact with stand-alone agents.  This library currently supports the VCX agent protocol, however will support interoperable agents as well once a HIPE-compliant python agent is available.
+This library provides a cloud-based framework for developing Hyperledger Indy Agent applications.  This platform supports agents for both individuals and organizations in a single platform, as well as provides the ability to interact with stand-alone agents.  This library currently supports the VCX agent protocol, however a future version will support the interoperable Indy Catalyst agent (https://github.com/bcgov/indy-catalyst/tree/master/agent).
 
 Note that this library is in early development stage.  It s suitable for developing a demonstration or POC but not (yet) for production applications.
 
@@ -21,8 +21,8 @@ Note that this library is in early development stage.  It s suitable for develop
 The following features are planned:
 
 - REST API (and demo application using vue.js)
-- Integration of [BC Government Python Agent](https://github.com/bcgov/indy-catalyst)
-- "Composer"-like application for generating an application framework
+- Integration of [BC Government Indy Catalyst Python Agent](https://github.com/bcgov/indy-catalyst/tree/master/agent)
+- "Hyperledger Composer"-like application for generating an application framework
 - Additional business demos
 - Video tutorials
 

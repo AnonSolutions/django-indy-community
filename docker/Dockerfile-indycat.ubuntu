@@ -1,0 +1,25 @@
+FROM anonsolutions/indy-community
+
+# Install indy python libraries and other dependencies
+ENV ENABLE_PTVSD 0
+
+# Add and install Indy Agent code
+ADD requirements.txt .
+ADD requirements.dev.txt .
+
+RUN pip3 install --no-cache-dir -r requirements.txt -r requirements.dev.txt
+
+ADD indy_catalyst_agent ./indy_catalyst_agent
+ADD scripts ./scripts
+ADD setup.py ./
+
+RUN pip3 install --no-cache-dir -e .
+
+# Add and install demo code
+COPY --chown=indy:indy demo ./demo
+
+RUN pip3 install --no-cache-dir -r demo/requirements.txt
+
+#RUN pip install requests
+
+CMD ["bash"]
