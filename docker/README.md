@@ -10,9 +10,13 @@ There are two options to run the application locally - running in docker (recomm
 ```bash
 git clone https://github.com/bcgov/von-network.git
 cd von-network
+git checkout e1dee37ce4a8ef76c37f03a1e0af399af9e6a820
 ./manage build
 ./manage start
 ```
+
+Note checkout the specific commit.  von-network has recently been updated to a newer version of Indy which is not 
+compatible with the (older) version of Indy in this repo.
 
 ... and in the second shell:
 
@@ -21,11 +25,14 @@ git clone https://github.com/AnonSolutions/django-indy-community.git
 # this is necessary only on 'nix since we are mounting local directories
 chmod -R a+rwx django-indy-community/indy_community_demo
 cd django-indy-community/docker
-./base-image      # note that this takes about 30 mintues
+#./base-image      # note that this takes about 30 mintues
 ./manage start
 ```
 
 Note that the "base-image" step is optional - the docker images are published on DockerHub - however this step is included for those interested in the inderlying Indy frameworks, how to build them, etc.
+
+Update - don't try to build the base image, rather use the published version.  The build will include more recent versions 
+of Indy that are not compatible with Django Indy Community code.
 
 That's it!  Your docker is up and running, open a browser and navigate to http://localhost:8000/
 
@@ -35,6 +42,8 @@ To shut down the environment, CTRL-C to stop the docker services and then in eac
 ./manage rm
 ```
 
+Note that you need to run this in BOTH shells (von-network and indy-community), it's important to keep the data in both sets of
+docker images in sync.
 
 ### Running Django Indy Community - "Bare Metal" Version
 
